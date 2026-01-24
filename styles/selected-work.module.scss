@@ -1,0 +1,125 @@
+.selectedWork {
+  padding: 10rem 8vw;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.item {
+  padding: 3rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: none;
+
+  h3 {
+    font-size: 3.2rem;
+    font-weight: 400;
+  }
+
+  span {
+    opacity: 0.6;
+    font-size: 1rem;
+  }
+}
+
+.preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 480px;
+  height: 320px;
+  pointer-events: none;
+  z-index: 998;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.viewCursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+
+  background: #aa2b2b; // pode trocar depois
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+
+  pointer-events: none;
+  z-index: 10000;
+
+  
+
+  will-change: transform, opacity;
+  
+}
+body.cursor-active .viewCursor {
+  opacity: 1;
+}
+
+
+.hideCursor {
+  cursor: none;
+}
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 5rem;
+  padding-bottom: 2rem;
+}
+
+.moreWorkBtn {
+  position: relative;
+  background: transparent;
+  padding: 0.6rem 6rem;
+  border-radius: 50px;
+  border: 1px solid rgba(125, 107, 107, 0.2); // Borda fina e discreta
+  color: #460101;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+
+  span {
+    position: relative;
+    z-index: 2;
+    transition: color 0.4s ease;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e44242;
+    transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+    z-index: 1;
+  }
+
+  &:hover {
+    border-color: #fff;
+    span { color: #000; }
+    &::before { transform: translateY(-100%); }
+  }
+}

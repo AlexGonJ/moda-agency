@@ -1,0 +1,24 @@
+.split {
+  display: flex;
+  flex-wrap: wrap;
+  line-height: 1.05;
+}
+
+.split > span {
+  overflow: hidden;
+  display: inline-block;
+}
+
+.word {
+  display: inline-block;
+  transform: translateY(120%);
+}
+.split {
+  display: inline; // mantém o fluxo normal do h1
+
+  span {
+    display: inline-block; // necessário apenas para a animação vertical
+    overflow: hidden;
+  }
+}
+

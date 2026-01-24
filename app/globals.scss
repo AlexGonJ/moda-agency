@@ -1,0 +1,30 @@
+@use '../styles/variables' as vars;
+
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+html, body {
+background: vars.$bg;
+color: vars.$text-primary;
+font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+font-weight: 400;
+letter-spacing: -0.01em;
+overflow-x: hidden;
+}
+
+
+section {
+padding: 12vh 6vw;
+}
+html, body {
+  overscroll-behavior: none;
+}
+
+.hide-system-cursor {
+  cursor: none !important;
+}

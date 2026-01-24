@@ -1,0 +1,46 @@
+.hero {
+  position: relative;
+  min-height: 100vh; // Mudei para 100vh para evitar scroll vazio desnecessário
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 6vw;
+}
+
+.heroBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 115%; // Reduzido de 140% para 115% (menos zoom)
+  object-fit: cover;
+  object-position: center; // Garante que o centro da foto seja o foco
+  z-index: 0;
+  will-change: transform;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  color: white;
+  // Mantive o resto igual...
+
+  pointer-events: none; // Evita interferir no scroll
+
+  h1 {
+    margin-top:40rem;
+    font-size: clamp(12rem, 4vw, 20rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin-top: 1.5rem;
+    font-size: 2rem;
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+}

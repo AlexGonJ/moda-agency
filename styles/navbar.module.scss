@@ -1,0 +1,100 @@
+@use './variables' as vars;
+
+.nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 4vh 6vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  color: #ffffff; // Cor inicial na Hero
+  transition: transform 0.3s ease;
+
+  // Classe aplicada via JS quando sai da Hero
+  &.afterHero {
+    mix-blend-mode: difference;
+    
+    .logo {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+}
+
+.logo {
+  font-weight: 600;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.3s ease;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.menu {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  
+  &.hidden {
+    display: none;
+  }
+}
+
+.menuItem {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -4px;
+    left: 0;
+    background-color: #ffffff;
+    transition: width 0.3s ease;
+  }
+  &:hover::after { width: 100%; }
+}
+
+.burgerWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: #ffffff;
+
+  &.hidden {
+    display: none;
+  }
+
+  span {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+}
+
+.burgerLines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  div {
+    width: 22px;
+    height: 1.5px;
+    background-color: #ffffff;
+  }
+}

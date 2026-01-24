@@ -1,0 +1,35 @@
+.navbar {
+position: fixed;
+top: 0;
+width: 100%;
+padding: 24px 80px;
+display: flex;
+justify-content: space-between;
+background: rgba(2, 12, 27, 0.8);
+backdrop-filter: blur(8px);
+z-index: 10;
+}
+
+
+.hero {
+min-height: 100vh;
+padding: 160px 80px 80px;
+display: grid;
+grid-template-columns: 1.2fr 1fr;
+gap: 80px;
+align-items: center;
+}
+
+
+.about,
+.projects,
+.contact {
+padding: 120px 80px;
+}
+
+
+.projects-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 32px;
+}
