@@ -1,7 +1,7 @@
 @use './variables' as vars;
 
 .about {
-  padding: 12rem 8vw;
+  padding: clamp(6rem, 15vw, 12rem) 8vw; // Padding dinâmico conforme a tela
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 2rem;
@@ -9,21 +9,40 @@
 
   .titleWrapper {
     grid-column: 1 / 9;
+    
+    @media (max-width: 1200px) {
+      grid-column: 1 / 10;
+    }
+    
+    @media (max-width: 900px) {
+      grid-column: 1 / -1; // Ocupa tudo no tablet
+    }
   }
 
   .textWrapper {
     grid-column: 10 / 13;
     padding-top: 0.5rem;
+
+    @media (max-width: 900px) {
+      grid-column: 1 / 8; // No tablet, fica abaixo mas não ocupa tudo
+      padding-top: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      grid-column: 1 / -1; // No celular ocupa tudo
+      padding-top: 1rem;
+    }
   }
 
-  // Estilizando o componente ScrollReveal internamente
+  // Estilizando o ScrollReveal
   .customH2 {
     margin: 0;
     :global(.scroll-reveal-text) {
-      font-size: clamp(2rem, 3.5vw, 3.5rem) !important;
+      // clamp(mínimo, escala_ideal, máximo)
+      font-size: clamp(1.8rem, 4vw, 3.5rem) !important;
       font-weight: 400 !important;
-      line-height: 1.15 !important;
-      letter-spacing: -0.01em;
+      line-height: 1.2 !important;
+      letter-spacing: -0.02em;
       text-align: left;
     }
   }
@@ -31,24 +50,21 @@
   .customP {
     margin: 0;
     :global(.scroll-reveal-text) {
-      font-size: 1.25rem !important;
+      font-size: clamp(1.1rem, 1.5vw, 1.3rem) !important;
       font-weight: 400 !important;
-      line-height: 1.5 !important;
+      line-height: 1.6 !important;
       opacity: 0.8;
       text-align: left;
     }
   }
 }
 
-@media (max-width: 1100px) {
+// Ajuste extra para telas muito pequenas
+@media (max-width: 600px) {
   .about {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
-    padding: 8rem 6vw;
-
-    .titleWrapper, .textWrapper {
-      width: 100%;
-    }
+    gap: 4rem; // Mais espaço entre o título e o parágrafo
+    padding: 6rem 6vw;
   }
 }

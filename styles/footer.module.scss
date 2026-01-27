@@ -1,23 +1,29 @@
-
 .footer {
   position: relative;
   background-color: #141414;
   height: 100vh;
   width: 100%;
   color: #fff;
-  overflow: hidden; // Essencial para o parallax interno não vazar
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 768px) {
+    height: auto; // No mobile, a altura deve ser livre para não cortar texto
+    min-height: 100vh;
+    padding-top: 50px;
+  }
 }
 
-// O efeito de curva que você queria: um "teto" arredondado que some no scroll
 .roundedEdge {
-  // A curva agora é apenas decorativa e fica no topo do footer
   position: absolute;
-  top: -50px;
+  top: -49px; // Um pixel a menos para evitar frestas
   left: 0;
   width: 100%;
   height: 50px;
   background-color: #141414;
   clip-path: ellipse(50% 100% at 50% 100%);
+  z-index: 2;
 }
 
 .inner {
@@ -27,13 +33,20 @@
   justify-content: space-between;
   padding: 15vh 8vw 5vh;
   will-change: transform;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    padding: 12vh 6vw 5vh;
+    justify-content: flex-start;
+    gap: 60px;
+  }
 }
 
 .main {
   position: relative;
   
   .title {
-    font-size: clamp(4rem, 14vw, 15rem);
+    font-size: clamp(3.5rem, 14vw, 15rem); // Reduzi levemente o mínimo
     line-height: 0.85;
     font-weight: 500;
     text-transform: uppercase;
@@ -43,6 +56,10 @@
       color: transparent;
       -webkit-text-stroke: 1px rgba(255,255,255,0.3);
       padding-left: 8vw;
+
+      @media (max-width: 768px) {
+        padding-left: 0;
+      }
     }
   }
 }
@@ -51,6 +68,20 @@
   position: absolute;
   right: 5vw;
   top: 60%;
+  z-index: 5;
+
+  @media (max-width: 1024px) {
+    position: relative;
+    top: 20px;
+    right: 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    margin-top: 20px;
+  }
   
   .circle {
     width: clamp(160px, 22vw, 280px);
@@ -65,13 +96,14 @@
 
     span {
       text-transform: uppercase;
-      font-size: 0.9rem;
+      font-size: clamp(0.7rem, 2vw, 0.9rem);
       font-weight: 700;
       letter-spacing: 0.1em;
+      text-align: center;
     }
 
     &:hover {
-      transform: scale(1.15) rotate(10deg);
+      transform: scale(1.1) rotate(10deg);
     }
   }
 }
@@ -85,43 +117,29 @@
   font-size: 0.9rem;
   opacity: 0.6;
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+  }
+
   .info, .socials {
     display: flex;
     gap: 3rem;
+
+    @media (max-width: 768px) {
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   }
   
-  a { color: #fff; text-decoration: none; }
-}
-
-@media (max-width: 1024px) {
-  .main .title .outline { padding-left: 0; }
-  .circleWrapper { position: relative; top: 0; right: 0; margin-top: 5rem; }
-}
-.footerContainer {
-  position: relative; // Fundamental: ele segue após o main, não fica atrás.
-  background-color: #141414;
-  padding: 10rem 8vw 5rem;
-  z-index: 5;
-  margin-top: -1px; // Remove qualquer linha branca entre seções
-}
-
-// ... restante do seu estilo do footer
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 12vh 8vw 5vh; // Reduzi um pouco o padding superior
-  will-change: transform;
-}
-
-.curve {
-  position: absolute;
-  top: -100px;
-  left: 0;
-  width: 100%;
-  height: 100px;
-  background-color: #141414;
-  // Se estiver usando o SVG, garanta que ele não tenha overflow
+  a { 
+    color: #fff; 
+    text-decoration: none;
+    transition: opacity 0.3s;
+    &:hover { opacity: 0.5; }
+  }
 }

@@ -1,27 +1,42 @@
 .list {
   position: relative;
   width: 100%;
-  height: 100%;
+  margin: 0 auto;
 }
 
 .item-wrapper {
   position: absolute;
   will-change: transform, width, height, opacity;
-  padding: 6px;
-  cursor: pointer;
-  top: 0;
-  left: 0;
+  padding: 4px; /* Reduzi de 6px para 4px para dar aspecto de miniatura */
+  box-sizing: border-box;
 }
 
-.item-wrapper > .item-img {
-  position: relative;
-  background-size: cover;
-  background-position: center center;
+.item-img {
   width: 100%;
   height: 100%;
-  text-transform: uppercase;
-  font-size: 10px;
-  line-height: 10px;
-  border-radius: 10px;
-  box-shadow: 0px 10px 50px -10px rgba(0, 0, 0, 0.2);
+  border-radius: 6px; /* Bordas mais finas para imagens menores */
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  transition: filter 0.3s ease;
+}
+.masonry-container {
+  overflow: visible !important; /* Permite que o GSAP anime sem cortar */
+  transition: height 0.4s ease-out;
+}
+
+.item-wrapper {
+  will-change: transform, width, height;
+  box-sizing: border-box;
+}
+
+.item-img {
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  background-repeat: no-repeat;
+}
+
+/* Ajuste para telas pequenas */
+@media (max-width: 768px) {
+  .masonry-container {
+    margin-top: 20px;
+    margin-bottom: 80px; /* Garante que o footer não suba */
+  }
 }

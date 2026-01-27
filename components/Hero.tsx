@@ -24,31 +24,33 @@ export default function Hero({ start }: HeroProps) {
       gsap.registerPlugin(ScrollTrigger)
 
       ctx = gsap.context(() => {
-        // --- EFEITO 1: PARALLAX NO SCROLL ---
-        const tlParallax = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        })
+        const mm = gsap.matchMedia();
 
-        tlParallax.to(imageRef.current, { y: '15%', ease: 'none' }, 0)
-        tlParallax.to(textRef.current, { y: '-150px', ease: 'none' }, 0)
+        mm.add("(min-width: 768px)", () => {
+          // Parallax apenas para Desktop/Tablet para evitar bugs de viewport no mobile
+          gsap.to(imageRef.current, {
+            y: '15%',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: true,
+            }
+          })
+        });
 
-        // --- EFEITO 2: ANIMAÇÃO DE ENTRADA (DEPENDENTE DO LOADER) ---
         if (start) {
           gsap.fromTo(
             [h1Ref.current, pRef.current],
-            { y: 60, opacity: 0 },
+            { y: 50, opacity: 0 },
             {
               y: 0,
               opacity: 1,
-              duration: 1.5,
-              stagger: 0.2,
-              ease: 'power4.out',
-              delay: 0.3,
+              duration: 1.2,
+              stagger: 0.15,
+              ease: 'power3.out',
+              delay: 0.5,
             }
           )
         }

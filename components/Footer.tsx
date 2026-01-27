@@ -11,42 +11,63 @@ export default function Footer() {
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
+    
+    // Media query para GSAP: ajusta a força do parallax no mobile
+    const mm = gsap.matchMedia();
 
-    // O segredo do parallax do Dennis: o conteúdo interno começa muito abaixo
-    // e sobe enquanto o container se revela.
-    gsap.fromTo(innerContentRef.current, 
-      { y: "-40%" }, 
-      {
-        y: "0%",
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top bottom", // Começa assim que o topo do footer aparece no pé da página
-          end: "bottom bottom", // Termina quando o footer preenche a tela
-          scrub: true
+    mm.add("(min-width: 769px)", () => {
+      // Desktop: Efeito Dennis Snellenberg completo
+      gsap.fromTo(innerContentRef.current, 
+        { y: "-40%" }, 
+        {
+          y: "0%",
+          ease: "none",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: true
+          }
         }
-      }
-    )
+      )
 
-    // Parallax extra para o círculo (ele se move em velocidade diferente)
-    gsap.fromTo(circleRef.current,
-      { y: 100 },
-      {
-        y: -150,
-        ease: "none",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top bottom",
-          end: "bottom bottom",
-          scrub: true
+      gsap.fromTo(circleRef.current,
+        { y: 100 },
+        {
+          y: -150,
+          ease: "none",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: true
+          }
         }
-      }
-    )
+      )
+    });
+
+    mm.add("(max-width: 768px)", () => {
+      // Mobile: Efeito reduzido para não causar bugs de altura
+      gsap.fromTo(innerContentRef.current, 
+        { y: "-15%" }, 
+        {
+          y: "0%",
+          ease: "none",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: true
+          }
+        }
+      )
+    });
+
+    return () => mm.revert(); // Limpa as animações ao desmontar
   }, [])
 
   return (
     <footer ref={containerRef} className={styles.footer}>
-      {/* A curva agora é uma DIV preenchida que suaviza a transição */}
       <div className={styles.roundedEdge}></div>
 
       <div ref={innerContentRef} className={styles.inner}>
@@ -66,7 +87,7 @@ export default function Footer() {
         <div className={styles.bottom}>
           <div className={styles.info}>
             <span>© 2026 Alex Design</span>
-            <span>Local Time {new Date().getHours()}:{new Date().getMinutes()}</span>
+            <span>Local Time {new Date().getHours()}:{new Date().getMinutes().toString().padStart(2, '0')}</span>
           </div>
           <div className={styles.socials}>
             <a href="#">LinkedIn</a>

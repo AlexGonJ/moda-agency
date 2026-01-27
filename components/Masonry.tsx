@@ -1,66 +1,9 @@
 'use client'
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-
 import './Masonry.css';
 
-const useMedia = (queries: string[], values: number[], defaultValue: number): number => {
-  // Trava para SSR: se não houver window, retorna o valor padrão
-  const get = () => {
-    if (typeof window === 'undefined') return defaultValue;
-    const index = queries.findIndex(q => window.matchMedia(q).matches);
-    return index !== -1 ? values[index] : defaultValue;
-  };
-
-  const [value, setValue] = useState<number>(get);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const handler = () => setValue(get);
-    const mediaQueries = queries.map(q => window.matchMedia(q));
-    
-    mediaQueries.forEach(mql => mql.addEventListener('change', handler));
-    return () => mediaQueries.forEach(mql => mql.removeEventListener('change', handler));
-  }, [queries]);
-
-  return value;
-};
-
-const useMeasure = <T extends HTMLElement>() => {
-  const ref = useRef<T | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useLayoutEffect(() => {
-    if (!ref.current || typeof window === 'undefined') return;
-    
-    const ro = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setSize({ width, height });
-    });
-    
-    ro.observe(ref.current);
-    return () => ro.disconnect();
-  }, []);
-
-  return [ref, size] as const;
-};
-
-const preloadImages = async (urls: string[]): Promise<void> => {
-  if (typeof window === 'undefined') return;
-  
-  await Promise.all(
-    urls.map(
-      src =>
-        new Promise<void>(resolve => {
-          const img = new Image();
-          img.src = src;
-          img.onload = img.onerror = () => resolve();
-        })
-    )
-  );
-};
-
+// --- INTERFACES ---
 interface Item {
   id: string;
   img: string;
@@ -77,188 +20,145 @@ interface GridItem extends Item {
 
 interface MasonryProps {
   items: Item[];
-  ease?: string;
-  duration?: number;
   stagger?: number;
-  animateFrom?: 'bottom' | 'top' | 'left' | 'right' | 'center' | 'random';
-  scaleOnHover?: boolean;
-  hoverScale?: number;
-  blurToFocus?: boolean;
-  colorShiftOnHover?: boolean;
 }
 
-const Masonry: React.FC<MasonryProps> = ({
-  items,
-  ease = 'power3.out',
-  duration = 0.6,
-  stagger = 0.05,
-  animateFrom = 'bottom',
-  scaleOnHover = true,
-  hoverScale = 0.95,
-  blurToFocus = true,
-  colorShiftOnHover = false
-}) => {
-  const columns = useMedia(
-    ['(min-width:1500px)', '(min-width:1000px)', '(min-width:600px)', '(min-width:400px)'],
-    [5, 4, 3, 2],
-    1
-  );
-
-  const [containerRef, { width }] = useMeasure<HTMLDivElement>();
+const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number>(0);
+  const [isMounted, setIsMounted] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
+  const hasMountedAnimation = useRef(false);
 
-  const getInitialPosition = (item: GridItem) => {
-    if (typeof window === 'undefined') return { x: item.x, y: item.y };
-    
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (!containerRect) return { x: item.x, y: item.y };
-
-    let direction = animateFrom;
-
-    if (animateFrom === 'random') {
-      const directions = ['top', 'bottom', 'left', 'right'];
-      direction = directions[Math.floor(Math.random() * directions.length)] as typeof animateFrom;
-    }
-
-    switch (direction) {
-      case 'top': return { x: item.x, y: -200 };
-      case 'bottom': return { x: item.x, y: window.innerHeight + 200 };
-      case 'left': return { x: -200, y: item.y };
-      case 'right': return { x: window.innerWidth + 200, y: item.y };
-      case 'center':
-        return {
-          x: containerRect.width / 2 - item.w / 2,
-          y: containerRect.height / 2 - item.h / 2
-        };
-      default: return { x: item.x, y: item.y + 100 };
-    }
-  };
-
+  // 1. Controle de Hydration: Garante que o código de tela só rode no Cliente
   useEffect(() => {
-    preloadImages(items.map(i => i.img)).then(() => setImagesReady(true));
-  }, [items]);
+    setIsMounted(true);
+    const handleResize = () => {
+      if (containerRef.current) setWidth(containerRef.current.offsetWidth);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  const grid = useMemo<GridItem[]>(() => {
-    if (!width) return [];
+  // 2. Cálculo do Grid Dinâmico
+  const { grid, totalHeight } = useMemo(() => {
+    // Retorno vazio para o servidor evitar erro #418
+    if (!isMounted || !width) return { grid: [] as GridItem[], totalHeight: 0 };
+
+    const isMobile = window.innerWidth < 768;
+    const columns = isMobile ? 2 : window.innerWidth < 1000 ? 3 : 4;
+    
+    // REDUÇÃO AJUSTADA: No mobile, agora permitimos até 10 itens (um pouco mais que antes)
+    const activeItems = isMobile ? items.slice(0, Math.min(items.length, 10)) : items;
 
     const colHeights = new Array(columns).fill(0);
     const columnWidth = width / columns;
+    
+    // Escala no mobile agora é 0.7 (maior que o 0.5 anterior) para preencher melhor
+    const imageScale = isMobile ? 0.7 : 1; 
 
-    return items.map(child => {
+    const gridData = activeItems.map((child: Item): GridItem => {
       const col = colHeights.indexOf(Math.min(...colHeights));
       const x = columnWidth * col;
-      const height = child.height / 2;
+      const h = (child.height / 2) * imageScale;
       const y = colHeights[col];
-
-      colHeights[col] += height;
-
-      return { ...child, x, y, w: columnWidth, h: height };
+      colHeights[col] += h;
+      return { ...child, x, y, w: columnWidth, h };
     });
-  }, [columns, items, width]);
 
-  const hasMounted = useRef(false);
+    // ESPAÇAMENTO: Reduzi o respiro para 60px no mobile e 120px no desktop
+    const safetyPadding = isMobile ? 60 : 120;
+    return { grid: gridData, totalHeight: Math.max(...colHeights) + safetyPadding };
+  }, [isMounted, width, items]);
 
+  // 3. Pré-carregamento de imagens
+  useEffect(() => {
+    if (!isMounted) return;
+    const urls = items.map((i: Item) => i.img);
+    Promise.all(urls.map((src: string) => new Promise<void>((resolve) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = img.onerror = () => resolve();
+    }))).then(() => setImagesReady(true));
+  }, [items, isMounted]);
+
+  // 4. Animação GSAP Segura
   useLayoutEffect(() => {
-    if (!imagesReady || typeof window === 'undefined') return;
+    if (!imagesReady || !isMounted || grid.length === 0) return;
 
-    grid.forEach((item, index) => {
+    grid.forEach((item: GridItem, index: number) => {
       const selector = `[data-key="${item.id}"]`;
-      const animationProps = {
-        x: item.x,
-        y: item.y,
-        width: item.w,
-        height: item.h
-      };
-
-      if (!hasMounted.current) {
-        const initialPos = getInitialPosition(item);
-        const initialState = {
-          opacity: 0,
-          x: initialPos.x,
-          y: initialPos.y,
-          width: item.w,
-          height: item.h,
-          ...(blurToFocus && { filter: 'blur(10px)' })
-        };
-
-        gsap.fromTo(selector, initialState, {
-          opacity: 1,
-          ...animationProps,
-          ...(blurToFocus && { filter: 'blur(0px)' }),
-          duration: 0.8,
-          ease: 'power3.out',
-          delay: index * stagger
-        });
+      if (!hasMountedAnimation.current) {
+        gsap.fromTo(selector, 
+          { opacity: 0, y: item.y + 50 },
+          { 
+            opacity: 1, 
+            x: item.x, 
+            y: item.y, 
+            width: item.w, 
+            height: item.h, 
+            duration: 0.8, 
+            delay: index * stagger, 
+            ease: 'power3.out' 
+          }
+        );
       } else {
-        gsap.to(selector, {
-          ...animationProps,
-          duration: duration,
-          ease: ease,
-          overwrite: 'auto'
+        gsap.to(selector, { 
+          x: item.x, 
+          y: item.y, 
+          width: item.w, 
+          height: item.h, 
+          duration: 0.6, 
+          ease: 'power3.out',
+          overwrite: 'auto' 
         });
       }
     });
+    hasMountedAnimation.current = true;
+  }, [grid, imagesReady, isMounted, stagger]);
 
-    hasMounted.current = true;
-  }, [grid, imagesReady, stagger, animateFrom, blurToFocus, duration, ease]);
-
-  const handleMouseEnter = (e: React.MouseEvent, item: GridItem) => {
-    const selector = `[data-key="${item.id}"]`;
-    if (scaleOnHover) {
-      gsap.to(selector, { scale: hoverScale, duration: 0.3, ease: 'power2.out' });
-    }
-    if (colorShiftOnHover) {
-      const overlay = (e.currentTarget as HTMLElement).querySelector('.color-overlay');
-      if (overlay) gsap.to(overlay, { opacity: 0.3, duration: 0.3 });
-    }
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent, item: GridItem) => {
-    const selector = `[data-key="${item.id}"]`;
-    if (scaleOnHover) {
-      gsap.to(selector, { scale: 1, duration: 0.3, ease: 'power2.out' });
-    }
-    if (colorShiftOnHover) {
-      const overlay = (e.currentTarget as HTMLElement).querySelector('.color-overlay');
-      if (overlay) gsap.to(overlay, { opacity: 0, duration: 0.3 });
-    }
-  };
+  // Fallback para Hydration
+  if (!isMounted) return <div ref={containerRef} style={{ width: '100%', minHeight: '400px' }} />;
 
   return (
-    <div ref={containerRef} className="list" style={{ position: 'relative', width: '100%', minHeight: '600px' }}>
-      {grid.map(item => (
+    <div 
+      ref={containerRef} 
+      className="masonry-root"
+      style={{ 
+        position: 'relative', 
+        width: '100%', 
+        height: `${totalHeight}px`, // Define a altura real que o Footer respeita
+        transition: 'height 0.4s ease-out' 
+      }}
+    >
+      {grid.map((item: GridItem) => (
         <div
           key={item.id}
           data-key={item.id}
           className="item-wrapper"
-          style={{ position: 'absolute', cursor: 'pointer', overflow: 'hidden' }}
+          style={{ 
+            position: 'absolute', 
+            cursor: 'pointer', 
+            overflow: 'hidden', 
+            width: item.w, 
+            height: item.h, 
+            padding: '6px',
+            willChange: 'transform, width, height'
+          }}
           onClick={() => item.url !== "#" && window.open(item.url, '_blank', 'noopener')}
-          onMouseEnter={e => handleMouseEnter(e, item)}
-          onMouseLeave={e => handleMouseLeave(e, item)}
         >
           <div 
-            className="item-img" 
+            className="item-img"
             style={{ 
-              backgroundImage: `url(${item.img})`,
-              width: '100%',
-              height: '100%',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              backgroundImage: `url(${item.img})`, 
+              width: '100%', 
+              height: '100%', 
+              backgroundSize: 'cover', 
+              backgroundPosition: 'center', 
               borderRadius: '8px'
             }} 
-          >
-            {colorShiftOnHover && (
-              <div
-                className="color-overlay"
-                style={{
-                  position: 'absolute',
-                  top: 0, left: 0, width: '100%', height: '100%',
-                  background: 'linear-gradient(45deg, rgba(255,0,150,0.5), rgba(0,150,255,0.5))',
-                  opacity: 0, pointerEvents: 'none', borderRadius: '8px'
-                }}
-              />
-            )}
-          </div>
+          />
         </div>
       ))}
     </div>
