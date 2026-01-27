@@ -1,17 +1,27 @@
+'use client'
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 import './Masonry.css';
 
 const useMedia = (queries: string[], values: number[], defaultValue: number): number => {
-  const get = () => values[queries.findIndex(q => matchMedia(q).matches)] ?? defaultValue;
+  // Trava para SSR: se não houver window, retorna o valor padrão
+  const get = () => {
+    if (typeof window === 'undefined') return defaultValue;
+    const index = queries.findIndex(q => window.matchMedia(q).matches);
+    return index !== -1 ? values[index] : defaultValue;
+  };
 
   const [value, setValue] = useState<number>(get);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handler = () => setValue(get);
-    queries.forEach(q => matchMedia(q).addEventListener('change', handler));
-    return () => queries.forEach(q => matchMedia(q).removeEventListener('change', handler));
+    const mediaQueries = queries.map(q => window.matchMedia(q));
+    
+    mediaQueries.forEach(mql => mql.addEventListener('change', handler));
+    return () => mediaQueries.forEach(mql => mql.removeEventListener('change', handler));
   }, [queries]);
 
   return value;
@@ -22,11 +32,13 @@ const useMeasure = <T extends HTMLElement>() => {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || typeof window === 'undefined') return;
+    
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
       setSize({ width, height });
     });
+    
     ro.observe(ref.current);
     return () => ro.disconnect();
   }, []);
@@ -35,6 +47,8 @@ const useMeasure = <T extends HTMLElement>() => {
 };
 
 const preloadImages = async (urls: string[]): Promise<void> => {
+  if (typeof window === 'undefined') return;
+  
   await Promise.all(
     urls.map(
       src =>
@@ -94,6 +108,8 @@ const Masonry: React.FC<MasonryProps> = ({
   const [imagesReady, setImagesReady] = useState(false);
 
   const getInitialPosition = (item: GridItem) => {
+    if (typeof window === 'undefined') return { x: item.x, y: item.y };
+    
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return { x: item.x, y: item.y };
 
@@ -105,21 +121,16 @@ const Masonry: React.FC<MasonryProps> = ({
     }
 
     switch (direction) {
-      case 'top':
-        return { x: item.x, y: -200 };
-      case 'bottom':
-        return { x: item.x, y: window.innerHeight + 200 };
-      case 'left':
-        return { x: -200, y: item.y };
-      case 'right':
-        return { x: window.innerWidth + 200, y: item.y };
+      case 'top': return { x: item.x, y: -200 };
+      case 'bottom': return { x: item.x, y: window.innerHeight + 200 };
+      case 'left': return { x: -200, y: item.y };
+      case 'right': return { x: window.innerWidth + 200, y: item.y };
       case 'center':
         return {
           x: containerRect.width / 2 - item.w / 2,
           y: containerRect.height / 2 - item.h / 2
         };
-      default:
-        return { x: item.x, y: item.y + 100 };
+      default: return { x: item.x, y: item.y + 100 };
     }
   };
 
@@ -148,7 +159,7 @@ const Masonry: React.FC<MasonryProps> = ({
   const hasMounted = useRef(false);
 
   useLayoutEffect(() => {
-    if (!imagesReady) return;
+    if (!imagesReady || typeof window === 'undefined') return;
 
     grid.forEach((item, index) => {
       const selector = `[data-key="${item.id}"]`;
@@ -192,84 +203,64 @@ const Masonry: React.FC<MasonryProps> = ({
   }, [grid, imagesReady, stagger, animateFrom, blurToFocus, duration, ease]);
 
   const handleMouseEnter = (e: React.MouseEvent, item: GridItem) => {
-    const element = e.currentTarget as HTMLElement;
     const selector = `[data-key="${item.id}"]`;
-
     if (scaleOnHover) {
-      gsap.to(selector, {
-        scale: hoverScale,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
+      gsap.to(selector, { scale: hoverScale, duration: 0.3, ease: 'power2.out' });
     }
-
     if (colorShiftOnHover) {
-      const overlay = element.querySelector('.color-overlay') as HTMLElement;
-      if (overlay) {
-        gsap.to(overlay, {
-          opacity: 0.3,
-          duration: 0.3
-        });
-      }
+      const overlay = (e.currentTarget as HTMLElement).querySelector('.color-overlay');
+      if (overlay) gsap.to(overlay, { opacity: 0.3, duration: 0.3 });
     }
   };
 
   const handleMouseLeave = (e: React.MouseEvent, item: GridItem) => {
-    const element = e.currentTarget as HTMLElement;
     const selector = `[data-key="${item.id}"]`;
-
     if (scaleOnHover) {
-      gsap.to(selector, {
-        scale: 1,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
+      gsap.to(selector, { scale: 1, duration: 0.3, ease: 'power2.out' });
     }
-
     if (colorShiftOnHover) {
-      const overlay = element.querySelector('.color-overlay') as HTMLElement;
-      if (overlay) {
-        gsap.to(overlay, {
-          opacity: 0,
-          duration: 0.3
-        });
-      }
+      const overlay = (e.currentTarget as HTMLElement).querySelector('.color-overlay');
+      if (overlay) gsap.to(overlay, { opacity: 0, duration: 0.3 });
     }
   };
 
   return (
-    <div ref={containerRef} className="list">
-      {grid.map(item => {
-        return (
-          <div
-            key={item.id}
-            data-key={item.id}
-            className="item-wrapper"
-            onClick={() => window.open(item.url, '_blank', 'noopener')}
-            onMouseEnter={e => handleMouseEnter(e, item)}
-            onMouseLeave={e => handleMouseLeave(e, item)}
+    <div ref={containerRef} className="list" style={{ position: 'relative', width: '100%', minHeight: '600px' }}>
+      {grid.map(item => (
+        <div
+          key={item.id}
+          data-key={item.id}
+          className="item-wrapper"
+          style={{ position: 'absolute', cursor: 'pointer', overflow: 'hidden' }}
+          onClick={() => item.url !== "#" && window.open(item.url, '_blank', 'noopener')}
+          onMouseEnter={e => handleMouseEnter(e, item)}
+          onMouseLeave={e => handleMouseLeave(e, item)}
+        >
+          <div 
+            className="item-img" 
+            style={{ 
+              backgroundImage: `url(${item.img})`,
+              width: '100%',
+              height: '100%',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              borderRadius: '8px'
+            }} 
           >
-            <div className="item-img" style={{ backgroundImage: `url(${item.img})` }}>
-              {colorShiftOnHover && (
-                <div
-                  className="color-overlay"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(45deg, rgba(255,0,150,0.5), rgba(0,150,255,0.5))',
-                    opacity: 0,
-                    pointerEvents: 'none',
-                    borderRadius: '8px'
-                  }}
-                />
-              )}
-            </div>
+            {colorShiftOnHover && (
+              <div
+                className="color-overlay"
+                style={{
+                  position: 'absolute',
+                  top: 0, left: 0, width: '100%', height: '100%',
+                  background: 'linear-gradient(45deg, rgba(255,0,150,0.5), rgba(0,150,255,0.5))',
+                  opacity: 0, pointerEvents: 'none', borderRadius: '8px'
+                }}
+              />
+            )}
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 };
