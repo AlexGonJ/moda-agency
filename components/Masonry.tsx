@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { gsap } from 'gsap';
 import './Masonry.css';
 
-// --- INTERFACES ---
+// 1. Interface completa com todas as propriedades opcionais (corrige erro da Vercel)
 interface Item {
   id: string;
   img: string;
@@ -20,17 +20,34 @@ interface GridItem extends Item {
 
 interface MasonryProps {
   items: Item[];
+  ease?: string;
+  duration?: number;
   stagger?: number;
+  animateFrom?: 'bottom' | 'top' | 'left' | 'right' | 'center' | 'random';
+  scaleOnHover?: boolean;
+  hoverScale?: number;
+  blurToFocus?: boolean;
+  colorShiftOnHover?: boolean;
 }
 
-const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
+const Masonry: React.FC<MasonryProps> = ({
+  items,
+  ease = 'power3.out',
+  duration = 0.6,
+  stagger = 0.05,
+  animateFrom = 'bottom',
+  scaleOnHover = true,
+  hoverScale = 0.95,
+  blurToFocus = true,
+  colorShiftOnHover = false
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
   const [isMounted, setIsMounted] = useState(false);
   const [imagesReady, setImagesReady] = useState(false);
   const hasMountedAnimation = useRef(false);
 
-  // 1. Controle de Hydration: Garante que o código de tela só rode no Cliente
+  // Controle de Hydration para Next.js
   useEffect(() => {
     setIsMounted(true);
     const handleResize = () => {
@@ -41,21 +58,18 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // 2. Cálculo do Grid Dinâmico
+  // Lógica de Grid e Altura Dinâmica
   const { grid, totalHeight } = useMemo(() => {
-    // Retorno vazio para o servidor evitar erro #418
     if (!isMounted || !width) return { grid: [] as GridItem[], totalHeight: 0 };
 
     const isMobile = window.innerWidth < 768;
     const columns = isMobile ? 2 : window.innerWidth < 1000 ? 3 : 4;
     
-    // REDUÇÃO AJUSTADA: No mobile, agora permitimos até 10 itens (um pouco mais que antes)
+    // Filtro para mobile: mostra no máximo 10 itens
     const activeItems = isMobile ? items.slice(0, Math.min(items.length, 10)) : items;
 
     const colHeights = new Array(columns).fill(0);
     const columnWidth = width / columns;
-    
-    // Escala no mobile agora é 0.7 (maior que o 0.5 anterior) para preencher melhor
     const imageScale = isMobile ? 0.7 : 1; 
 
     const gridData = activeItems.map((child: Item): GridItem => {
@@ -67,12 +81,11 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
       return { ...child, x, y, w: columnWidth, h };
     });
 
-    // ESPAÇAMENTO: Reduzi o respiro para 60px no mobile e 120px no desktop
     const safetyPadding = isMobile ? 60 : 120;
     return { grid: gridData, totalHeight: Math.max(...colHeights) + safetyPadding };
   }, [isMounted, width, items]);
 
-  // 3. Pré-carregamento de imagens
+  // Pré-load das imagens
   useEffect(() => {
     if (!isMounted) return;
     const urls = items.map((i: Item) => i.img);
@@ -83,7 +96,7 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
     }))).then(() => setImagesReady(true));
   }, [items, isMounted]);
 
-  // 4. Animação GSAP Segura
+  // Animações GSAP
   useLayoutEffect(() => {
     if (!imagesReady || !isMounted || grid.length === 0) return;
 
@@ -93,32 +106,20 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
         gsap.fromTo(selector, 
           { opacity: 0, y: item.y + 50 },
           { 
-            opacity: 1, 
-            x: item.x, 
-            y: item.y, 
-            width: item.w, 
-            height: item.h, 
-            duration: 0.8, 
-            delay: index * stagger, 
-            ease: 'power3.out' 
+            opacity: 1, x: item.x, y: item.y, width: item.w, height: item.h, 
+            duration: 0.8, delay: index * stagger, ease: 'power3.out' 
           }
         );
       } else {
         gsap.to(selector, { 
-          x: item.x, 
-          y: item.y, 
-          width: item.w, 
-          height: item.h, 
-          duration: 0.6, 
-          ease: 'power3.out',
-          overwrite: 'auto' 
+          x: item.x, y: item.y, width: item.w, height: item.h, 
+          duration, ease, overwrite: 'auto' 
         });
       }
     });
     hasMountedAnimation.current = true;
-  }, [grid, imagesReady, isMounted, stagger]);
+  }, [grid, imagesReady, isMounted, stagger, duration, ease]);
 
-  // Fallback para Hydration
   if (!isMounted) return <div ref={containerRef} style={{ width: '100%', minHeight: '400px' }} />;
 
   return (
@@ -128,7 +129,7 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
       style={{ 
         position: 'relative', 
         width: '100%', 
-        height: `${totalHeight}px`, // Define a altura real que o Footer respeita
+        height: `${totalHeight}px`, 
         transition: 'height 0.4s ease-out' 
       }}
     >
@@ -138,12 +139,8 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
           data-key={item.id}
           className="item-wrapper"
           style={{ 
-            position: 'absolute', 
-            cursor: 'pointer', 
-            overflow: 'hidden', 
-            width: item.w, 
-            height: item.h, 
-            padding: '6px',
+            position: 'absolute', cursor: 'pointer', overflow: 'hidden', 
+            width: item.w, height: item.h, padding: '6px',
             willChange: 'transform, width, height'
           }}
           onClick={() => item.url !== "#" && window.open(item.url, '_blank', 'noopener')}
@@ -151,12 +148,9 @@ const Masonry: React.FC<MasonryProps> = ({ items, stagger = 0.05 }) => {
           <div 
             className="item-img"
             style={{ 
-              backgroundImage: `url(${item.img})`, 
-              width: '100%', 
-              height: '100%', 
-              backgroundSize: 'cover', 
-              backgroundPosition: 'center', 
-              borderRadius: '8px'
+              backgroundImage: `url(${item.img})`, width: '100%', height: '100%', 
+              backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px',
+              transition: scaleOnHover ? 'transform 0.3s ease' : 'none'
             }} 
           />
         </div>
