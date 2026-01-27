@@ -31,16 +31,15 @@ export default function Navbar() {
     })
   }, [])
 
-  return (
+ return (
     <nav 
       ref={navRef} 
-      // Aplica a classe que esconde a logo e ativa o blend mode
       className={`${styles.nav} ${isPastHero ? styles.afterHero : ''}`}
     >
       <span className={styles.logo}>Code by Alex</span>
       
       <div className={styles.navRight}>
-        {/* Mostra a lista apenas se não scrollou o suficiente E ainda está na Hero */}
+        {/* Lógica mantida: O CSS cuidará de esconder isso no mobile via @media */}
         {!isScrolled && !isPastHero && (
           <ul className={styles.menu}>
             <li><a href="#sobre" className={styles.menuItem}>Sobre</a></li>
@@ -49,16 +48,19 @@ export default function Navbar() {
           </ul>
         )}
 
-        {/* Sanduíche aparece se scrollou OU se já passou da Hero */}
-        {(isScrolled || isPastHero) && (
-          <div className={styles.burgerWrapper}>
-            <span>Menu</span>
-            <div className={styles.burgerLines}>
-              <div />
-              <div />
-            </div>
+        {/* O Burger aparecerá se houver scroll OU se for mobile (via CSS) */}
+        <div 
+          className={styles.burgerWrapper}
+          style={{ 
+            display: (isScrolled || isPastHero) ? 'flex' : 'none' 
+          }}
+        >
+          <span>Menu</span>
+          <div className={styles.burgerLines}>
+            <div />
+            <div />
           </div>
-        )}
+        </div>
       </div>
     </nav>
   )

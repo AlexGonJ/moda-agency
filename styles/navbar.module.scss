@@ -9,10 +9,13 @@
   justify-content: space-between;
   align-items: center;
   z-index: 100;
-  color: #ffffff; // Cor inicial na Hero
+  color: #ffffff;
   transition: transform 0.3s ease;
 
-  // Classe aplicada via JS quando sai da Hero
+  @media (max-width: 768px) {
+    padding: 2.5vh 6vw; // Padding menor no mobile
+  }
+
   &.afterHero {
     mix-blend-mode: difference;
     
@@ -30,6 +33,10 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   transition: opacity 0.3s ease;
+
+  @media (max-width: 480px) {
+    font-size: 1rem; // Logo levemente menor em celulares pequenos
+  }
 }
 
 .navRight {
@@ -44,9 +51,10 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  
-  &.hidden {
-    display: none;
+
+  // ESCONDE O MENU DE LINKS NO MOBILE
+  @media (max-width: 900px) {
+    display: none !important;
   }
 }
 
@@ -77,14 +85,21 @@
   cursor: pointer;
   color: #ffffff;
 
-  &.hidden {
-    display: none;
+  // GARANTE QUE O BURGER APAREÇA NO MOBILE MESMO SEM SCROLL
+  @media (max-width: 900px) {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   span {
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+
+    @media (max-width: 480px) {
+      display: none; // Esconde a palavra "Menu" em telas muito pequenas para poupar espaço
+    }
   }
 }
 

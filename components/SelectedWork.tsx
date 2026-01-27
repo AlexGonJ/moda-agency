@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import styles from '../styles/selected-work.module.scss'
 
@@ -26,92 +26,69 @@ export default function SelectedWork() {
   const previewRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const cursorRef = useRef<HTMLDivElement>(null)
-  const sectionRef = useRef<HTMLElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const preview = previewRef.current
-    const img = imgRef.current
-    const cursor = cursorRef.current
-    if (!preview || !img || !cursor) return
-
-    let mouseX = 0
-    let mouseY = 0
-    let x = 0
-    let y = 0
-    let isHovering = false
-    let rafId: number | null = null
-
-    gsap.set([preview, cursor], {
-      opacity: 0,
-      scale: 0.85,
-      xPercent: -50,
-      yPercent: -50,
-    })
-
-    const move = (e: MouseEvent) => {
-      mouseX = e.clientX
-      mouseY = e.clientY
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 1024)
     }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
 
-    const render = () => {
-      // O loop continua mas só aplica transformações se estiver pairando
-      x += (mouseX - x) * 0.12
-      y += (mouseY - y) * 0.12
+    // Só inicia lógica de mouse se NÃO for mobile
+    if (window.innerWidth > 1024) {
+      const preview = previewRef.current
+      const img = imgRef.current
+      const cursor = cursorRef.current
+      if (!preview || !img || !cursor) return
 
-      gsap.set(preview, { x, y })
-      gsap.set(cursor, { x, y })
+      let mouseX = 0, mouseY = 0, x = 0, y = 0
+      let rafId: number | null = null
 
+      gsap.set([preview, cursor], { opacity: 0, scale: 0.85, xPercent: -50, yPercent: -50 })
+
+      const move = (e: MouseEvent) => {
+        mouseX = e.clientX
+        mouseY = e.clientY
+      }
+
+      const render = () => {
+        x += (mouseX - x) * 0.12
+        y += (mouseY - y) * 0.12
+        gsap.set(preview, { x, y })
+        gsap.set(cursor, { x, y })
+        rafId = requestAnimationFrame(render)
+      }
+
+      const items = document.querySelectorAll('[data-project]')
+      items.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          const image = item.getAttribute('data-image')
+          if (image && img) img.src = image
+          gsap.to(preview, { opacity: 1, scale: 1, duration: 0.35, ease: 'power3.out' })
+          gsap.to(cursor, { opacity: 1, scale: 1, duration: 0.25, ease: 'power3.out' })
+        })
+        item.addEventListener('mouseleave', () => {
+          gsap.to([preview, cursor], { opacity: 0, scale: 0.85, duration: 0.25, ease: 'power3.out' })
+        })
+      })
+
+      window.addEventListener('mousemove', move)
       rafId = requestAnimationFrame(render)
+
+      return () => {
+        window.removeEventListener('mousemove', move)
+        if (rafId) cancelAnimationFrame(rafId)
+      }
     }
 
-    const items = document.querySelectorAll('[data-project]')
-
-    items.forEach(item => {
-      const image = item.getAttribute('data-image')
-      if (!image) return
-
-      item.addEventListener('mouseenter', () => {
-        isHovering = true
-        if (image) img.src = image
-        
-        gsap.to(preview, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.35,
-          ease: 'power3.out',
-        })
-
-        gsap.to(cursor, {
-          opacity: 1,
-          scale: 1,
-          duration: 0.25,
-          ease: 'power3.out',
-        })
-      })
-
-      item.addEventListener('mouseleave', () => {
-        isHovering = false
-        gsap.to([preview, cursor], {
-          opacity: 0,
-          scale: 0.85,
-          duration: 0.25,
-          ease: 'power3.out',
-        })
-      })
-    })
-
-    window.addEventListener('mousemove', move)
-    rafId = requestAnimationFrame(render)
-
-    return () => {
-      window.removeEventListener('mousemove', move)
-      if (rafId) cancelAnimationFrame(rafId)
-    }
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   return (
-    <section ref={sectionRef} className={styles.selectedWork}>
-      <h2>Selected Work</h2>
+    <section className={styles.selectedWork}>
+      <h2 className={styles.sectionTitle}>Selected Work</h2>
 
       <div className={styles.list}>
         {projects.map((project, index) => (
@@ -121,28 +98,34 @@ export default function SelectedWork() {
             data-project
             data-image={project.image}
           >
-            <h3>{project.title}</h3>
-            <span>{project.meta}</span>
+            {/* Imagem visível APENAS no Mobile */}
+            <div className={styles.mobileImage}>
+              <img src={project.image} alt={project.title} />
+            </div>
+
+            <div className={styles.itemContent}>
+              <h3>{project.title}</h3>
+              <span>{project.meta}</span>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* BOTÃO MORE WORK */}
       <div className={styles.buttonWrapper}>
         <button className={styles.moreWorkBtn}>
           <span>More work</span>
         </button>
       </div>
 
-      {/* PREVIEW FLUTUANTE */}
-      <div ref={previewRef} className={styles.preview}>
-        <img ref={imgRef} alt="Project Preview" />
-      </div>
-
-      {/* CURSOR VIEW */}
-      <div ref={cursorRef} className={styles.viewCursor}>
-        VIEW
-      </div>
+      {/* Preview e Cursor: Renderizados apenas no Desktop */}
+      {!isMobile && (
+        <>
+          <div ref={previewRef} className={styles.preview}>
+            <img ref={imgRef} alt="Preview" />
+          </div>
+          <div ref={cursorRef} className={styles.viewCursor}>VIEW</div>
+        </>
+      )}
     </section>
   )
 }
