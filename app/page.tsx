@@ -1,6 +1,6 @@
 'use client'
+
 import { useState, useEffect } from 'react'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import SelectedWork from '@/components/SelectedWork'
@@ -14,14 +14,21 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading) {
-      setTimeout(() => { ScrollTrigger.refresh() }, 500)
+      const refreshScrollTrigger = async () => {
+        if (typeof window === 'undefined') return
+
+        const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+        ScrollTrigger.refresh()
+      }
+
+      setTimeout(refreshScrollTrigger, 500)
     }
   }, [isLoading])
 
   return (
     <>
       {isLoading && <Loader onComplete={() => setIsLoading(false)} />}
-      
+
       <div className="smooth-wrapper" style={{ opacity: isLoading ? 0 : 1 }}>
         <main style={{ backgroundColor: '#fff', position: 'relative', zIndex: 1 }}>
           <Navbar />
