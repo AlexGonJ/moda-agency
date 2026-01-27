@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import styles from '../styles/splitText.module.scss'
+import styles from '../../styles/splitText.module.scss'
 
 interface SplitTextProps {
   children: React.ReactNode
@@ -44,7 +44,7 @@ export default function SplitText({ children }: SplitTextProps) {
       }
     })
 
-    const wordsSpans = container.querySelectorAll<HTMLSpanElement>('span[data-word]')
+    const wordsSpans = container.querySelectorAll('span[data-word]')
 
     gsap.fromTo(
       wordsSpans,
@@ -61,10 +61,6 @@ export default function SplitText({ children }: SplitTextProps) {
         },
       }
     )
-
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill())
-    }
   }, [])
 
   return (

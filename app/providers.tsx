@@ -2,48 +2,63 @@
 
 import { ReactNode, useEffect } from 'react'
 import Lenis from '@studio-freight/lenis'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 export default function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
-    const lenis = new Lenis({
-      lerp: 0.08, // suavidade (Dennis usa algo nessa faixa)
-      wheelMultiplier: 1,
-      touchMultiplier: 1.2,
-    })
+    if (typeof window === 'undefined') return
 
-    function raf(time: number) {
-      lenis.raf(time)
-      ScrollTrigger.update()
-      requestAnimationFrame(raf)
+    let lenis: Lenis | null = null
+    let rafId: number
+
+    const init = async () => {
+      const gsapModule = await import('gsap')
+      const scrollTriggerModule = await import('gsap/ScrollTrigger')
+
+      const gsap = gsapModule.default
+      const ScrollTrigger = scrollTriggerModule.default
+
+      gsap.registerPlugin(ScrollTrigger)
+
+      lenis = new Lenis({
+        lerp: 0.08,
+        wheelMultiplier: 1,
+        touchMultiplier: 1.2,
+      })
+
+      function raf(time: number) {
+        lenis?.raf(time)
+        ScrollTrigger.update()
+        rafId = requestAnimationFrame(raf)
+      }
+
+      rafId = requestAnimationFrame(raf)
+
+      // integra Lenis + ScrollTrigger
+      ScrollTrigger.scrollerProxy(document.body, {
+        scrollTop(value) {
+          if (arguments.length && lenis) {
+            lenis.scrollTo(value!)
+          }
+          return window.scrollY
+        },
+        getBoundingClientRect() {
+          return {
+            top: 0,
+            left: 0,
+            width: window.innerWidth,
+            height: window.innerHeight,
+          }
+        },
+      })
+
+      ScrollTrigger.refresh()
     }
 
-    requestAnimationFrame(raf)
-
-    // sincroniza ScrollTrigger com Lenis
-    ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        return arguments.length
-          ? lenis.scrollTo(value!)
-          : window.scrollY
-      },
-      getBoundingClientRect() {
-        return {
-          top: 0,
-          left: 0,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        }
-      },
-    })
-
-    ScrollTrigger.refresh()
+    init()
 
     return () => {
-      lenis.destroy()
+      if (rafId) cancelAnimationFrame(rafId)
+      lenis?.destroy()
     }
   }, [])
 

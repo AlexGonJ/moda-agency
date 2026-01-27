@@ -1,10 +1,30 @@
 'use client'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
+let gsapInstance: any = null
+let ScrollTriggerInstance: any = null
 
-export const fadeUp = (el: HTMLElement, delay = 0) => {
+const loadGSAP = async () => {
+  if (typeof window === 'undefined') return null
+
+  if (!gsapInstance || !ScrollTriggerInstance) {
+    const gsapModule = await import('gsap')
+    const scrollTriggerModule = await import('gsap/ScrollTrigger')
+
+    gsapInstance = gsapModule.default
+    ScrollTriggerInstance = scrollTriggerModule.default
+
+    gsapInstance.registerPlugin(ScrollTriggerInstance)
+  }
+
+  return { gsap: gsapInstance, ScrollTrigger: ScrollTriggerInstance }
+}
+
+export const fadeUp = async (el: HTMLElement, delay = 0) => {
+  const ctx = await loadGSAP()
+  if (!ctx) return
+
+  const { gsap } = ctx
+
   gsap.fromTo(
     el,
     { y: 80, opacity: 0 },
@@ -22,7 +42,12 @@ export const fadeUp = (el: HTMLElement, delay = 0) => {
   )
 }
 
-export const revealProject = (el: HTMLElement) => {
+export const revealProject = async (el: HTMLElement) => {
+  const ctx = await loadGSAP()
+  if (!ctx) return
+
+  const { gsap } = ctx
+
   const image = el.querySelector('img')
   const meta = el.querySelector('[data-meta]')
 
@@ -63,7 +88,13 @@ export const revealProject = (el: HTMLElement) => {
     '-=0.6'
   )
 }
-export const parallaxImage = (el: HTMLElement) => {
+
+export const parallaxImage = async (el: HTMLElement) => {
+  const ctx = await loadGSAP()
+  if (!ctx) return
+
+  const { gsap } = ctx
+
   gsap.fromTo(
     el,
     { y: 0 },
