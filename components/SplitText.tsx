@@ -2,26 +2,24 @@
 
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from '../styles/splitText.module.scss'
 
 interface SplitTextProps {
   children: React.ReactNode
+  animate?: boolean   // true = anima imediatamente, false = aguarda
 }
 
-export default function SplitText({ children }: SplitTextProps) {
+export default function SplitText({ children, animate = false }: SplitTextProps) {
   const containerRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    gsap.registerPlugin(ScrollTrigger)
-
     const container = containerRef.current
     if (!container) return
 
+    // Split por palavras
     const nodes = Array.from(container.childNodes)
-
     nodes.forEach(node => {
       if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
         const fragment = document.createDocumentFragment()
@@ -31,41 +29,43 @@ export default function SplitText({ children }: SplitTextProps) {
           if (/\s+/.test(word)) {
             fragment.appendChild(document.createTextNode(word))
           } else {
-            const span = document.createElement('span')
-            span.textContent = word
-            span.dataset.word = word
-            span.style.display = 'inline-block'
-            span.style.overflow = 'hidden'
-            fragment.appendChild(span)
+            const outer = document.createElement('span')
+            outer.style.display = 'inline-block'
+            outer.style.overflow = 'hidden'
+            outer.style.verticalAlign = 'bottom'
+
+            const inner = document.createElement('span')
+            inner.textContent = word
+            inner.dataset.word = word
+            inner.style.display = 'inline-block'
+            inner.style.transform = 'translateY(110%)'
+
+            outer.appendChild(inner)
+            fragment.appendChild(outer)
           }
         })
 
         container.replaceChild(fragment, node)
       }
     })
-
-    const wordsSpans = container.querySelectorAll<HTMLSpanElement>('span[data-word]')
-
-    gsap.fromTo(
-      wordsSpans,
-      { y: '120%', opacity: 0 },
-      {
-        y: '0%',
-        opacity: 1,
-        stagger: 0.1,
-        duration: 2.0,
-        ease: 'power4.out',
-        scrollTrigger: {
-          trigger: container,
-          start: 'top 85%',
-        },
-      }
-    )
-
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill())
-    }
   }, [])
+
+  // Dispara quando animate muda para true
+  useEffect(() => {
+    if (!animate) return
+
+    const container = containerRef.current
+    if (!container) return
+
+    const words = container.querySelectorAll<HTMLSpanElement>('span[data-word]')
+
+    gsap.to(words, {
+      y: '0%',
+      duration: 1.2,
+      ease: 'power4.out',
+      stagger: 0.06,
+    })
+  }, [animate])
 
   return (
     <span ref={containerRef} className={styles.split}>

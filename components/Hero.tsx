@@ -16,18 +16,17 @@ export default function Hero({ start }: HeroProps) {
   const h1Ref = useRef<HTMLHeadingElement>(null)
   const pRef = useRef<HTMLParagraphElement>(null)
 
- useEffect(() => {
+useEffect(() => {
   let ctx: gsap.Context | undefined
 
   const move = (e: MouseEvent) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 30
+    const x = (e.clientX / window.innerWidth  - 0.5) * 30
     const y = (e.clientY / window.innerHeight - 0.5) * 30
 
     gsap.to(imageRef.current, {
-      x,
-      y,
-      duration: 1,
-      ease: 'power3.out'
+      x, y,
+      duration: 1.2,
+      ease: 'power3.out',
     })
   }
 
@@ -36,40 +35,35 @@ export default function Hero({ start }: HeroProps) {
     gsap.registerPlugin(ScrollTrigger)
 
     ctx = gsap.context(() => {
+      // Imagem sobe pouco
       gsap.to(imageRef.current, {
-        y: 120,
-        scale: 1.15, // IMPORTANT: more scale to avoid white edges
+        y: 80,
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: true,
-        }
+          scrub: 1.5,
+        },
       })
 
+      // Texto sobe bem mais — defasagem evidente
       gsap.to(textRef.current, {
-        y: '-10%',
+        y: '-50%',
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: true,
-        }
+          scrub: 1.5,
+        },
       })
 
       if (start) {
         gsap.fromTo(
           pRef.current,
           { y: 30, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1,
-            ease: 'power3.out',
-            delay: 1.2,
-          }
+          { y: 0, opacity: 1, duration: 1, ease: 'power3.out', delay: 1.2 }
         )
       }
     }, sectionRef)
@@ -95,12 +89,12 @@ export default function Hero({ start }: HeroProps) {
       <div className={styles.overlayNoise} />
 
       <div className={styles.content} ref={textRef}>
-        <h1>
-          <SplitText>
-            Designing digital experiences with <br />
-            clarity & purpose
-          </SplitText>
-        </h1>
+      <h1>
+  <SplitText animate={start}>
+    Designing digital experiences with <br />
+    clarity & purpose
+  </SplitText>
+</h1>
           
         
         <p ref={pRef} style={{ opacity: 0 }}>

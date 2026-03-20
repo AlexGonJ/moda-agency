@@ -4,17 +4,17 @@
   width: 100%;
   overflow: hidden;
   display: flex;
-  align-items: center; // Centraliza verticalmente o conteúdo
-  justify-content: flex-start;
-  padding: 0 8vw;
+  align-items: flex-start;      // topo
+  justify-content: flex-start;  // esquerda
+  padding: 14vh 8vw 0;          // respira abaixo da navbar
 }
 
 .heroBg {
   position: absolute;
-  top: -5%; // add bleed
+  top: -20%;
   left: -5%;
   width: 110%;
-  height: 130%; // more vertical space
+  height: 150%;
   object-fit: cover;
   object-position: 70% center;
   z-index: 0;
@@ -26,13 +26,24 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-
   background: linear-gradient(
     to right,
-    rgba(10, 10, 10, 0.85) 0%,
-    rgba(10, 10, 10, 0.6) 35%,
-    rgba(10, 10, 10, 0.2) 60%,
+    rgba(10, 10, 10, 0.88) 0%,
+    rgba(10, 10, 10, 0.55) 40%,
+    rgba(10, 10, 10, 0.15) 65%,
     transparent 100%
+  );
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 10, 0.45) 0%,
+    transparent 35%
   );
 }
 
@@ -41,57 +52,46 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-
   background: radial-gradient(
     circle at 20% 50%,
-    rgba(255,255,255,0.06),
+    rgba(255, 255, 255, 0.05),
     transparent 40%
   );
 }
-.content h1 {
-  text-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  font-size: clamp(2.5rem, 8vw, 7rem);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
 
-.content p {
- text-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
 .content {
   position: relative;
   z-index: 2;
-  max-width: 1200px; // Aumentado para suportar títulos longos em telas grandes
   color: white;
   pointer-events: none;
+  max-width: 900px;
 
   h1 {
-    // clamp(minimo, preferido, maximo)
-    // Ajustado para não ficar gigante no mobile nem pequeno no desktop
-    font-size: clamp(2.5rem, 8vw, 7rem); 
+    font-size: clamp(3rem, 7.5vw, 7.5rem);
     font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin: 0; // Removido o margin-top exagerado
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin: 0;
+    text-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 
     @media (max-width: 768px) {
-      br {
-        display: none; // No mobile, deixa o texto fluir sem quebras forçadas
-      }
+      font-size: clamp(2.8rem, 10vw, 4rem);
+      line-height: 1.05;
+      br { display: none; }
     }
   }
 
   p {
-    margin-top: 2rem;
-    font-size: clamp(1rem, 2vw, 1.5rem);
-    max-width: 500px;
-    line-height: 1.5;
-    opacity: 0.8;
+    margin-top: clamp(1.5rem, 3vw, 2rem);
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    max-width: 46ch;
+    line-height: 1.65;
+    opacity: 0.75;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 
     @media (max-width: 768px) {
-      margin-top: 1.5rem;
       max-width: 100%;
+      font-size: 1rem;
     }
   }
 }

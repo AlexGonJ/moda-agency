@@ -28,3 +28,10 @@ html, body {
 .hide-system-cursor {
   cursor: none !important;
 }
+:root {
+  --color-gold:    #c9a84c;
+  --color-ink:     #0d0d0d;
+  --color-surface: #ffffff;
+  --color-muted:   rgba(0, 0, 0, 0.35);
+  --color-border:  rgba(0, 0, 0, 0.1);
+}
