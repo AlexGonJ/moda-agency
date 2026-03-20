@@ -24,4 +24,41 @@
   width: 100%;
   position: relative;
   min-height: 400px; // Força uma altura mínima para o Masonry ser visível
+  border-radius: 2rem;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 1.25rem;
+}
+
+.masonryBackdrop {
+  position: absolute;
+  inset: 0;
+  background: #060606;
+  z-index: 0;
+}
+
+.depthLayer {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 65% 30%, rgba(109, 109, 109, 0.2), transparent 55%),
+    radial-gradient(circle at 30% 70%, rgba(77, 77, 77, 0.18), transparent 52%),
+    linear-gradient(135deg, #121212 8%, #050505 85%);
+  transform: scale(1.08);
+}
+
+.womanIllustration {
+  position: absolute;
+  inset: 0;
+  background-image: url('/illustrations/contact-woman-depth.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 60% center;
+  opacity: 0.95;
+  filter: contrast(1.05) saturate(1.05);
+}
+
+.masonryContent {
+  position: relative;
+  z-index: 1;
 }
