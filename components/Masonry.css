@@ -24,8 +24,12 @@
 }
 
 .item-wrapper {
-  will-change: transform, width, height;
-  box-sizing: border-box;
+  overflow: hidden;
+}
+.item-wrapper:hover .item-img {
+  /* Se hoverScale for 0.95 (diminuir), use scale(0.95) */
+  /* Se quiser que aumente, use scale(1.05) */
+  transform: scale(0.95); 
 }
 
 .item-img {

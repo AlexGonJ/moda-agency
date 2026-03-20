@@ -9,18 +9,18 @@ const Masonry = dynamic(() => import('./Masonry'), {
 })
 
 const items = [
-  { id: "1", img: "https://picsum.photos/id/10/600/900?grayscale", height: 400, url: "#" },
-  { id: "2", img: "https://picsum.photos/id/11/600/750?grayscale", height: 280, url: "#" },
-  { id: "3", img: "https://picsum.photos/id/12/600/800?grayscale", height: 500, url: "#" },
-  { id: "4", img: "https://picsum.photos/id/13/600/700?grayscale", height: 320, url: "#" },
-  { id: "5", img: "https://picsum.photos/id/14/600/900?grayscale", height: 450, url: "#" },
-  { id: "6", img: "https://picsum.photos/id/15/600/750?grayscale", height: 300, url: "#" },
-  { id: "7", img: "https://picsum.photos/id/16/600/800?grayscale", height: 520, url: "#" },
-  { id: "8", img: "https://picsum.photos/id/17/600/700?grayscale", height: 380, url: "#" },
-  { id: "9", img: "https://picsum.photos/id/18/600/900?grayscale", height: 410, url: "#" },
-  { id: "10", img: "https://picsum.photos/id/19/600/750?grayscale", height: 280, url: "#" },
-  { id: "11", img: "https://picsum.photos/id/20/600/800?grayscale", height: 460, url: "#" },
-  { id: "12", img: "https://picsum.photos/id/21/600/700?grayscale", height: 340, url: "#" },
+  { id: "1", img: "/projects/enge.png", height: 400, url: "#" },
+  { id: "2", img: "/projects/financa.png", height: 280, url: "#" },
+  { id: "3", img: "/projects/aline2.png", height: 500, url: "#" },
+  { id: "4", img: "/projects/aline.png", height: 320, url: "#" },
+  { id: "5", img: "/projects/vendas.png", height: 450, url: "#" },
+  { id: "6", img: "/projects/tinta.png", height: 300, url: "#" },
+  { id: "7", img: "/projects/work1.png", height: 520, url: "#" },
+  { id: "8", img: "/projects/dre.png", height: 380, url: "#" },
+  { id: "9", img: "/projects/work2.png", height: 410, url: "#" },
+  { id: "10", img: "/projects/via.png", height: 280, url: "#" },
+  { id: "11", img: "/projects/work2.png", height: 460, url: "#" },
+  { id: "12", img: "/projects/aline2.png", height: 340, url: "#" },
 ]
 
 export default function Contact() {

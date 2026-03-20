@@ -16,66 +16,93 @@ export default function Hero({ start }: HeroProps) {
   const h1Ref = useRef<HTMLHeadingElement>(null)
   const pRef = useRef<HTMLParagraphElement>(null)
 
-  useEffect(() => {
-    let ctx: gsap.Context | undefined
+ useEffect(() => {
+  let ctx: gsap.Context | undefined
 
-    ;(async () => {
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-      gsap.registerPlugin(ScrollTrigger)
+  const move = (e: MouseEvent) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 30
+    const y = (e.clientY / window.innerHeight - 0.5) * 30
 
-      ctx = gsap.context(() => {
-        const mm = gsap.matchMedia();
+    gsap.to(imageRef.current, {
+      x,
+      y,
+      duration: 1,
+      ease: 'power3.out'
+    })
+  }
 
-        mm.add("(min-width: 768px)", () => {
-          // Parallax apenas para Desktop/Tablet para evitar bugs de viewport no mobile
-          gsap.to(imageRef.current, {
-            y: '15%',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top top',
-              end: 'bottom top',
-              scrub: true,
-            }
-          })
-        });
+  ;(async () => {
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+    gsap.registerPlugin(ScrollTrigger)
 
-        if (start) {
-          gsap.fromTo(
-            [h1Ref.current, pRef.current],
-            { y: 50, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 1.2,
-              stagger: 0.15,
-              ease: 'power3.out',
-              delay: 0.5,
-            }
-          )
+    ctx = gsap.context(() => {
+      gsap.to(imageRef.current, {
+        y: 120,
+        scale: 1.15, // IMPORTANT: more scale to avoid white edges
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
         }
-      }, sectionRef)
-    })()
+      })
 
-    return () => ctx?.revert()
-  }, [start])
+      gsap.to(textRef.current, {
+        y: '-10%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+        }
+      })
+
+      if (start) {
+        gsap.fromTo(
+          pRef.current,
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 1.2,
+          }
+        )
+      }
+    }, sectionRef)
+
+    window.addEventListener('mousemove', move)
+  })()
+
+  return () => {
+    ctx?.revert()
+    window.removeEventListener('mousemove', move)
+  }
+}, [start])
 
   return (
     <section ref={sectionRef} className={styles.hero}>
       <img
         ref={imageRef}
         className={styles.heroBg}
-        src="./hero.jpg"
+        src="./heroi1.png"
         alt="Hero background"
       />
 
+      <div className={styles.overlayNoise} />
+
       <div className={styles.content} ref={textRef}>
-        <h1 ref={h1Ref} style={{ opacity: 0 }}>
+        <h1>
           <SplitText>
             Designing digital experiences with <br />
             clarity & purpose
           </SplitText>
         </h1>
+          
+        
         <p ref={pRef} style={{ opacity: 0 }}>
           Focused on crafting thoughtful interfaces and meaningful digital products.
         </p>

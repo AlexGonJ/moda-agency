@@ -1,12 +1,14 @@
 .split {
-  display: flex;
-  flex-wrap: wrap;
-  line-height: 1.05;
+  display: inline;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  line-height: inherit; // IMPORTANT: keeps natural text behavior
 }
 
-.split > span {
-  overflow: hidden;
+.split span {
   display: inline-block;
+  overflow: hidden;
 }
 
 .word {

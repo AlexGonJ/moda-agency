@@ -48,12 +48,12 @@ export default function SplitText({ children }: SplitTextProps) {
 
     gsap.fromTo(
       wordsSpans,
-      { y: '100%', opacity: 0 },
+      { y: '120%', opacity: 0 },
       {
         y: '0%',
         opacity: 1,
-        stagger: 0.2,
-        duration: 2.5,
+        stagger: 0.1,
+        duration: 2.0,
         ease: 'power4.out',
         scrollTrigger: {
           trigger: container,
