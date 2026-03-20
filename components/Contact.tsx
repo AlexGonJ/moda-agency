@@ -62,16 +62,23 @@ export default function Contact() {
         </div>
 
         <div className={styles.masonryWrapper}>
-          <Masonry
-            items={items}
-            ease="power3.out"
-            duration={0.7}
-            stagger={0.05}
-            animateFrom="bottom"
-            scaleOnHover
-            hoverScale={0.97}
-            blurToFocus
-          />
+          <div className={styles.masonryBackdrop} aria-hidden="true">
+            <div className={styles.depthLayer} />
+            <div className={styles.womanIllustration} />
+          </div>
+
+          <div className={styles.masonryContent}>
+            <Masonry
+              items={items}
+              ease="power3.out"
+              duration={0.7}
+              stagger={0.05}
+              animateFrom="bottom"
+              scaleOnHover
+              hoverScale={0.97}
+              blurToFocus
+            />
+          </div>
         </div>
       </div>
     </section>
