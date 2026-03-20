@@ -73,7 +73,11 @@ const Masonry: React.FC<MasonryProps> = ({
     const imageScale = isMobile ? 0.7 : 1; 
 
     const gridData = activeItems.map((child: Item): GridItem => {
-      const col = colHeights.indexOf(Math.min(...colHeights));
+    const sorted = colHeights
+  .map((h, i) => ({ h, i }))
+  .sort((a, b) => a.h - b.h);
+
+const col = Math.random() > 0.5 ? sorted[0].i : sorted[1].i;
       const x = columnWidth * col;
       const h = (child.height / 2) * imageScale;
       const y = colHeights[col];
