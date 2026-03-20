@@ -1,11 +1,13 @@
 'use client'
 
+import type { CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import styles from '../styles/contact.module.scss'
 
 // Carrega o Masonry apenas no cliente para evitar erros de SSR no build
-const Masonry = dynamic(() => import('./Masonry'), { 
-  ssr: false 
+const Masonry = dynamic(() => import('./Masonry'), {
+  ssr: false
 })
 
 const items = [
@@ -24,8 +26,32 @@ const items = [
 ]
 
 export default function Contact() {
+  const [parallaxY, setParallaxY] = useState(0)
+  const parallaxStyle = { '--parallax-y': `${parallaxY}px` } as CSSProperties
+
+  useEffect(() => {
+    let frame = 0
+
+    const onScroll = () => {
+      if (frame) return
+
+      frame = window.requestAnimationFrame(() => {
+        setParallaxY(window.scrollY * 0.08)
+        frame = 0
+      })
+    }
+
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
+
   return (
-    <section className={styles.contact}>
+    <section className={styles.contact} style={parallaxStyle}>
       <div className={styles.container}>
         <div className={styles.header}>
           <p className={styles.label}>Connect</p>
