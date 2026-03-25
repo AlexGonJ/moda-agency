@@ -74,7 +74,7 @@
 /* HOVER → COLORIDO + LEVE DESTAQUE */
 .item-wrapper:hover .item-img {
   filter: grayscale(0%) contrast(1.05) brightness(1);
-  transform: scale(1.03);
+  transform: scale(var(--hover-scale, 1.03));
 }
 
 /* REMOVE OVERLAY NO HOVER */

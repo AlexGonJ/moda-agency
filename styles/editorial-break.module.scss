@@ -1,0 +1,87 @@
+.breakSection {
+  padding: clamp(4.5rem, 9vw, 8rem) 0;
+  overflow: clip;
+  background:
+    linear-gradient(180deg, #ebe0d0 0%, #f5eee4 56%, #faf7f2 100%);
+  color: #1e1a16;
+}
+
+.label,
+.support {
+  padding: 0 8vw;
+}
+
+.label {
+  font-size: 0.68rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(30, 26, 22, 0.38);
+  margin-bottom: 1.6rem;
+}
+
+.track {
+  display: flex;
+  gap: 4.5rem;
+  white-space: nowrap;
+  padding: 0 8vw;
+  font-size: clamp(4.2rem, 12vw, 10rem);
+  line-height: 0.86;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+
+  span {
+    color: rgba(30, 26, 22, 0.12);
+
+    &:nth-child(2) {
+      color: #1e1a16;
+    }
+  }
+}
+
+.statement {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0 8vw;
+  margin-top: 1.5rem;
+
+  p {
+    font-size: clamp(1.8rem, 3.6vw, 3.3rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: rgba(30, 26, 22, 0.92);
+
+    &:last-child {
+      color: rgba(30, 26, 22, 0.42);
+      padding-left: clamp(2rem, 8vw, 8rem);
+    }
+  }
+}
+
+.support {
+  margin-top: 2rem;
+  max-width: 28rem;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: rgba(30, 26, 22, 0.54);
+}
+
+@media (max-width: 768px) {
+  .breakSection {
+    padding: 3.5rem 0 4rem;
+  }
+
+  .track {
+    gap: 1.6rem;
+    letter-spacing: 0.08em;
+  }
+
+  .statement {
+    margin-top: 1rem;
+  }
+
+  .statement p:last-child {
+    padding-left: 2rem;
+  }
+}

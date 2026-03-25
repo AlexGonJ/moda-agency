@@ -1,6 +1,8 @@
 .selectedWork {
   padding: clamp(5rem, 10vw, 10rem) 8vw;
   position: relative;
+  z-index: 2;
+  background: #fff;
 }
 
 .sectionLabel {
@@ -157,6 +159,7 @@
   display: flex;
   justify-content: center;
   margin-top: clamp(3rem, 8vw, 6rem);
+  margin-bottom: clamp(2.5rem, 7vw, 5rem);
 }
 
 .moreWorkBtn {

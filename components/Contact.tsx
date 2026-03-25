@@ -51,14 +51,26 @@ export default function Contact() {
   }, [])
 
   return (
-    <section className={styles.contact} style={parallaxStyle}>
+    <section id="contato" className={styles.contact} style={parallaxStyle}>
       <div className={styles.container}>
-        <div className={styles.header}>
-          <p className={styles.label}>Connect</p>
-          <h2 className={styles.title}>
-            <span className={styles.line1}>Get in</span>
-            <span className={styles.line2}>touch</span>
-          </h2>
+        <div className={styles.introRow}>
+          <div className={styles.header}>
+            <p className={styles.label}>Connect</p>
+            <h2 className={styles.title}>
+              <span className={styles.line1}>Get in</span>
+              <span className={styles.line2}>touch</span>
+            </h2>
+          </div>
+
+          <div className={styles.editorialAside}>
+            <p className={styles.asideLead}>
+              Disponível para branding, motion, visual systems e interfaces com direção mais autoral.
+            </p>
+            <div className={styles.asideMeta}>
+              <span>Brazil / Remote</span>
+              <span>2026 bookings open</span>
+            </div>
+          </div>
         </div>
 
         <div className={styles.masonryWrapper}>
@@ -75,7 +87,7 @@ export default function Contact() {
               stagger={0.05}
               animateFrom="bottom"
               scaleOnHover
-              hoverScale={0.97}
+              hoverScale={1.08}
               blurToFocus
             />
           </div>

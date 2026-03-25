@@ -177,7 +177,7 @@ const handleGlow = (e: React.MouseEvent<HTMLAnchorElement>): void => {
 }
 
   return (
-    <section ref={sectionRef} className={styles.selectedWork}>
+    <section id="projetos" ref={sectionRef} className={styles.selectedWork}>
       <p className={styles.sectionLabel}>Selected Work</p>
 
       <ul className={styles.list}>

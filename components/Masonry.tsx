@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './Masonry.css';
 
@@ -35,21 +35,19 @@ const Masonry: React.FC<MasonryProps> = ({
   ease = 'power3.out',
   duration = 0.6,
   stagger = 0.05,
-  animateFrom = 'bottom',
   scaleOnHover = true,
   hoverScale = 0.95,
   blurToFocus = true,
-  colorShiftOnHover = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted] = useState(typeof window !== 'undefined');
   const [imagesReady, setImagesReady] = useState(false);
   const hasMountedAnimation = useRef(false);
+  const introAnimationPlayed = useRef(false);
 
   // Controle de Hydration para Next.js
   useEffect(() => {
-    setIsMounted(true);
     const handleResize = () => {
       if (containerRef.current) setWidth(containerRef.current.offsetWidth);
     };
@@ -73,11 +71,11 @@ const Masonry: React.FC<MasonryProps> = ({
     const imageScale = isMobile ? 0.7 : 1; 
 
     const gridData = activeItems.map((child: Item): GridItem => {
-    const sorted = colHeights
-  .map((h, i) => ({ h, i }))
-  .sort((a, b) => a.h - b.h);
+      const sorted = colHeights
+        .map((h, i) => ({ h, i }))
+        .sort((a, b) => a.h - b.h);
 
-const col = Math.random() > 0.5 ? sorted[0].i : sorted[1].i;
+      const col = sorted[0].i;
       const x = columnWidth * col;
       const h = (child.height / 2) * imageScale;
       const y = colHeights[col];
@@ -104,25 +102,83 @@ const col = Math.random() > 0.5 ? sorted[0].i : sorted[1].i;
   useLayoutEffect(() => {
     if (!imagesReady || !isMounted || grid.length === 0) return;
 
-    grid.forEach((item: GridItem, index: number) => {
-      const selector = `[data-key="${item.id}"]`;
-      if (!hasMountedAnimation.current) {
-        gsap.fromTo(selector, 
-          { opacity: 0, y: item.y + 50 },
-          { 
-            opacity: 1, x: item.x, y: item.y, width: item.w, height: item.h, 
-            duration: 0.8, delay: index * stagger, ease: 'power3.out' 
+    let ctx: gsap.Context | undefined;
+
+    (async () => {
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
+
+      ctx = gsap.context(() => {
+        grid.forEach((item: GridItem) => {
+          const selector = `[data-key="${item.id}"]`;
+          const centerX = item.x + item.w / 2;
+          const centerY = item.y + item.h / 2;
+          const spreadX = (centerX - width / 2) * 0.22;
+          const spreadY = (centerY - totalHeight / 2) * 0.18;
+
+          if (!hasMountedAnimation.current && !introAnimationPlayed.current) {
+            gsap.set(selector, {
+              opacity: 0,
+              x: item.x + spreadX,
+              y: item.y + spreadY + 80,
+              scale: 0.86,
+              width: item.w,
+              height: item.h,
+              filter: blurToFocus ? 'blur(18px)' : 'none',
+            });
+          } else {
+            gsap.to(selector, {
+              x: item.x,
+              y: item.y,
+              width: item.w,
+              height: item.h,
+              duration,
+              ease,
+              overwrite: 'auto'
+            });
           }
-        );
-      } else {
-        gsap.to(selector, { 
-          x: item.x, y: item.y, width: item.w, height: item.h, 
-          duration, ease, overwrite: 'auto' 
         });
-      }
-    });
-    hasMountedAnimation.current = true;
-  }, [grid, imagesReady, isMounted, stagger, duration, ease]);
+
+        if (!introAnimationPlayed.current && containerRef.current) {
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: 'top 85%',
+              once: true,
+            },
+          });
+
+          grid.forEach((item: GridItem, index: number) => {
+            const selector = `[data-key="${item.id}"]`;
+
+            tl.to(
+              selector,
+              {
+                opacity: 1,
+                x: item.x,
+                y: item.y,
+                scale: 1,
+                width: item.w,
+                height: item.h,
+                filter: 'blur(0px)',
+                duration: 1,
+                ease: 'power3.out',
+              },
+              index * stagger
+            );
+          });
+
+          introAnimationPlayed.current = true;
+        }
+
+        hasMountedAnimation.current = true;
+      }, containerRef);
+    })();
+
+    return () => {
+      ctx?.revert();
+    };
+  }, [grid, imagesReady, isMounted, stagger, duration, ease, blurToFocus, totalHeight, width]);
 
   if (!isMounted) return <div ref={containerRef} style={{ width: '100%', minHeight: '400px' }} />;
 
@@ -151,11 +207,12 @@ const col = Math.random() > 0.5 ? sorted[0].i : sorted[1].i;
         >
           <div 
             className="item-img"
-            style={{ 
+            style={{
+              '--hover-scale': hoverScale.toString(),
               backgroundImage: `url(${item.img})`, width: '100%', height: '100%', 
               backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px',
               transition: scaleOnHover ? 'transform 0.3s ease' : 'none'
-            }} 
+            } as CSSProperties}
           />
         </div>
       ))}

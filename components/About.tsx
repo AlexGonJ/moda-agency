@@ -4,7 +4,7 @@ import ScrollReveal from './ScrollReveal'
 
 export default function About() {
   return (
-    <section className={styles.about}>
+    <section id="sobre" className={styles.about}>
       {/* Lado Esquerdo: Título maior */}
       <div className={styles.titleWrapper}>
         <ScrollReveal
