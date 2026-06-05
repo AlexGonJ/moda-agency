@@ -111,9 +111,7 @@ export default function MotionShowcase() {
       gsap.set(copies, {
         opacity: 0,
         yPercent: 18,
-        rotationX: -10,
-        skewY: 2,
-        z: -60,
+        ...(isMobile ? {} : { rotationX: -10, skewY: 2, z: -60 }),
       })
 
       gsap.set(images[0], {
@@ -126,9 +124,7 @@ export default function MotionShowcase() {
       gsap.set(copies[0], {
         opacity: 0,
         yPercent: 24,
-        rotationX: -14,
-        skewY: 3,
-        z: -80,
+        ...(isMobile ? {} : { rotationX: -14, skewY: 3, z: -80 }),
       })
 
       const timeline = gsap.timeline({
@@ -183,9 +179,7 @@ export default function MotionShowcase() {
         {
           opacity: 1,
           yPercent: 0,
-          rotationX: 0,
-          skewY: 0,
-          z: 0,
+          ...(isMobile ? {} : { rotationX: 0, skewY: 0, z: 0 }),
           duration: 0.95,
         },
         0.16
@@ -223,9 +217,7 @@ export default function MotionShowcase() {
             {
               opacity: 0,
               yPercent: -18,
-              rotationX: 12,
-              skewY: -3,
-              z: -120,
+              ...(isMobile ? {} : { rotationX: 12, skewY: -3, z: -120 }),
               duration: 0.72,
             },
             'step-' + index
@@ -259,16 +251,12 @@ export default function MotionShowcase() {
             {
               opacity: 0,
               yPercent: 24,
-              rotationX: -14,
-              skewY: 3,
-              z: -80,
+              ...(isMobile ? {} : { rotationX: -14, skewY: 3, z: -80 }),
             },
             {
               opacity: 1,
               yPercent: 0,
-              rotationX: 0,
-              skewY: 0,
-              z: 0,
+              ...(isMobile ? {} : { rotationX: 0, skewY: 0, z: 0 }),
               duration: 0.95,
             },
             'step-' + index + '+=0.16'

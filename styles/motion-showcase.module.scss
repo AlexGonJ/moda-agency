@@ -452,16 +452,31 @@
     }
   }
 
+  .copyBlock {
+    h2,
+    .description,
+    .eyebrow,
+    .index,
+    .accent {
+      transform: none !important;
+      filter: none !important;
+      transition: none !important;
+    }
+  }
+
   .copyBlock h2 {
     font-size: clamp(3.2rem, 12vw, 4.5rem);
     letter-spacing: -0.04em;
     text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    line-height: 1;
+    margin-top: 0.5rem;
   }
 
   .description {
     max-width: 100%;
     font-size: 1.05rem;
     color: rgba(255, 255, 255, 0.9);
+    margin-top: 1rem;
   }
 
   .editorialMeta {
