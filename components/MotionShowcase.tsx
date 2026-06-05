@@ -3,29 +3,58 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from '../styles/motion-showcase.module.scss'
+
+const VideoPlayer = ({ src, isActive }: { src: string, isActive: boolean }) => {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    if (isActive) {
+      // Play the video when the slide becomes active (blur fades out)
+      videoRef.current?.play().catch(() => {})
+    } else {
+      // Pause and reset when the slide is no longer active
+      videoRef.current?.pause()
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0
+      }
+    }
+  }, [isActive])
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      muted
+      playsInline
+      onEnded={(e) => e.currentTarget.pause()}
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+  )
+}
 
 const slides = [
   {
     id: '01',
-    eyebrow: 'Atmosphere',
-    title: 'A imagem entra como fumaça e ganha corpo no scroll.',
+    eyebrow: 'Estratégia',
+    title: 'O posicionamento que esculpe a marca.',
     description:
-      'Duas imagens reais se sobrepõem em tempos diferentes, deixando um rastro suave que parece nascer do fundo em vez de aparecer em um bloco rígido.',
+      'Direcionamento preciso que interage com a cultura, desenhando narrativas fortes que acompanham e celebram a essência de cada cliente.',
     primaryImage:
       'https://images.pexels.com/photos/9907670/pexels-photo-9907670.jpeg?cs=srgb&dl=pexels-ron-lach-9907670.jpg&fm=jpg',
     secondaryImage:
       'https://images.pexels.com/photos/9849939/pexels-photo-9849939.jpeg?cs=srgb&dl=pexels-ron-lach-9849939.jpg&fm=jpg',
-    accent: 'Smoke reveal',
+    accent: 'Fluid reveal',
     tint: 'rgba(170, 126, 66, 0.22)',
     smoke: 'radial-gradient(circle at 42% 46%, rgba(255,255,255,0.2), transparent 26%), radial-gradient(circle at 62% 54%, rgba(217,191,135,0.18), transparent 24%), radial-gradient(circle at 28% 62%, rgba(255,255,255,0.14), transparent 22%)',
   },
   {
     id: '02',
-    eyebrow: 'Depth',
-    title: 'Planos que se atravessam sem perder a leitura.',
+    eyebrow: 'Branding',
+    title: 'A profundidade de cada campanha.',
     description:
-      'Uma camada mais ampla ocupa o campo inteiro e a segunda aproxima a narrativa, criando uma transição menos literal e muito mais orgânica.',
+      'Ideias criativas se sobrepõem, criando um diálogo íntimo entre a marca e o público através de visuais ricos e direção de arte fina.',
     primaryImage:
       'https://images.pexels.com/photos/10567351/pexels-photo-10567351.jpeg?cs=srgb&dl=pexels-ron-lach-10567351.jpg&fm=jpg',
     secondaryImage:
@@ -36,15 +65,14 @@ const slides = [
   },
   {
     id: '03',
-    eyebrow: 'Presence',
-    title: 'O texto responde ao scroll e parece mais próximo do olhar.',
+    eyebrow: 'Conteúdo',
+    title: 'A presença que permanece.',
     description:
-      'Enquanto as imagens respiram em dupla exposição, a tipografia inclina e flutua levemente para reforçar a sensação de profundidade.',
+      'Projetos elaborados com visão, que capturam a essência e expressam relevância através da comunicação absoluta e acabamento primoroso.',
     primaryImage:
       'https://images.pexels.com/photos/9907670/pexels-photo-9907670.jpeg?cs=srgb&dl=pexels-ron-lach-9907670.jpg&fm=jpg',
-    secondaryImage:
-      'https://images.pexels.com/photos/9849321/pexels-photo-9849321.jpeg?cs=srgb&dl=pexels-ron-lach-9849321.jpg&fm=jpg',
-    accent: 'Floating text',
+    secondaryImage: '/woman.mp4',
+    accent: 'Timeless details',
     tint: 'rgba(198, 161, 95, 0.2)',
     smoke: 'radial-gradient(circle at 48% 44%, rgba(255,255,255,0.14), transparent 24%), radial-gradient(circle at 70% 52%, rgba(217,191,135,0.18), transparent 24%), radial-gradient(circle at 32% 66%, rgba(255,255,255,0.1), transparent 24%)',
   },
@@ -56,180 +84,195 @@ export default function MotionShowcase() {
   const copyRefs = useRef<(HTMLDivElement | null)[]>([])
   const progressLineRef = useRef<HTMLSpanElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [videoReadyIndex, setVideoReadyIndex] = useState(-1)
 
   useEffect(() => {
-    let ctx: gsap.Context | undefined
+    gsap.registerPlugin(ScrollTrigger)
 
-    ;(async () => {
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-      gsap.registerPlugin(ScrollTrigger)
+    const ctx = gsap.context(() => {
+      const images = imageRefs.current.filter(Boolean)
+      const copies = copyRefs.current.filter(Boolean)
+      if (!sectionRef.current || images.length === 0 || copies.length === 0) return
 
-      ctx = gsap.context(() => {
-        const images = imageRefs.current.filter(Boolean)
-        const copies = copyRefs.current.filter(Boolean)
-        if (!sectionRef.current || images.length === 0 || copies.length === 0) return
+      gsap.set(images, {
+        opacity: 0,
+        scale: 1.14,
+        yPercent: 12,
+        filter: 'blur(34px)',
+      })
 
-        gsap.set(images, {
-          opacity: 0,
-          scale: 1.14,
-          yPercent: 12,
-          filter: 'blur(34px)',
-        })
+      gsap.set(copies, {
+        opacity: 0,
+        yPercent: 18,
+        rotationX: -10,
+        skewY: 2,
+        z: -60,
+      })
 
-        gsap.set(copies, {
-          opacity: 0,
-          yPercent: 18,
-          rotationX: -10,
-          skewY: 2,
-          z: -60,
-        })
+      gsap.set(images[0], {
+        opacity: 1,
+        scale: 1.16,
+        yPercent: 12,
+        filter: 'blur(54px)',
+      })
 
-        gsap.set(images[0], {
+      gsap.set(copies[0], {
+        opacity: 0,
+        yPercent: 24,
+        rotationX: -14,
+        skewY: 3,
+        z: -80,
+      })
+
+      const timeline = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: '+=370%',
+          pin: true,
+          scrub: 1.15,
+          anticipatePin: 1,
+          refreshPriority: 1,
+          invalidateOnRefresh: true,
+          onUpdate: self => {
+            const scaledProgress = self.progress * (slides.length - 1)
+            const rawIndex = Math.round(scaledProgress)
+            const nextIndex = Math.max(0, Math.min(slides.length - 1, rawIndex))
+            const fractional = scaledProgress - nextIndex
+            const drift = Math.sin(scaledProgress * Math.PI) * 14
+            const tilt = fractional * 3.5
+
+            setActiveIndex(prev => (prev === nextIndex ? prev : nextIndex))
+
+            sectionRef.current?.style.setProperty('--text-shift', `${drift.toFixed(2)}px`)
+            sectionRef.current?.style.setProperty('--text-tilt', `${tilt.toFixed(2)}deg`)
+            sectionRef.current?.style.setProperty('--text-blur', `${Math.abs(fractional * 1.6).toFixed(2)}px`)
+
+            if (progressLineRef.current) {
+              gsap.set(progressLineRef.current, { scaleX: Math.max(0.1, self.progress) })
+            }
+          },
+        },
+      })
+
+      timeline.to(images[0], {
+        scale: 1,
+        yPercent: 0,
+        filter: 'blur(0px)',
+        duration: 1.25,
+        onUpdate: function() {
+          if (this.progress() >= 0.95) {
+            setVideoReadyIndex(prev => (prev === 0 ? prev : 0))
+          } else {
+            setVideoReadyIndex(prev => (prev === 0 ? -1 : prev))
+          }
+        }
+      })
+
+      timeline.to(
+        copies[0],
+        {
           opacity: 1,
-          scale: 1.16,
-          yPercent: 12,
-          filter: 'blur(54px)',
-        })
+          yPercent: 0,
+          rotationX: 0,
+          skewY: 0,
+          z: 0,
+          duration: 0.95,
+        },
+        0.16
+      )
 
-        gsap.set(copies[0], {
-          opacity: 0,
-          yPercent: 24,
-          rotationX: -14,
-          skewY: 3,
-          z: -80,
-        })
+      // Delay only the first transition so the opening frame holds longer on scroll.
+      timeline.addLabel('step-1', 1.15)
 
-        const timeline = gsap.timeline({
-          defaults: { ease: 'power3.out' },
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: '+=370%',
-            pin: true,
-            scrub: 1.15,
-            anticipatePin: 1,
-            refreshPriority: 1,
-            invalidateOnRefresh: true,
-            onUpdate: self => {
-              const scaledProgress = self.progress * (slides.length - 1)
-              const rawIndex = Math.round(scaledProgress)
-              const nextIndex = Math.max(0, Math.min(slides.length - 1, rawIndex))
-              const fractional = scaledProgress - nextIndex
-              const drift = Math.sin(scaledProgress * Math.PI) * 14
-              const tilt = fractional * 3.5
+      images.forEach((image, index) => {
+        if (index === 0) return
 
-              setActiveIndex(prev => (prev === nextIndex ? prev : nextIndex))
+        const previousImage = images[index - 1]
+        const previousCopy = copies[index - 1]
+        const currentCopy = copies[index]
 
-              sectionRef.current?.style.setProperty('--text-shift', `${drift.toFixed(2)}px`)
-              sectionRef.current?.style.setProperty('--text-tilt', `${tilt.toFixed(2)}deg`)
-              sectionRef.current?.style.setProperty('--text-blur', `${Math.abs(fractional * 1.6).toFixed(2)}px`)
-
-              if (progressLineRef.current) {
-                gsap.set(progressLineRef.current, { scaleX: Math.max(0.1, self.progress) })
+        timeline
+          .to(
+            previousImage,
+            {
+              opacity: 0.14,
+              scale: 1.24,
+              yPercent: -8,
+              filter: 'blur(48px)',
+              duration: 1,
+              onUpdate: function() {
+                if (this.progress() > 0.05) {
+                  setVideoReadyIndex(prev => (prev === (index - 1) ? -1 : prev))
+                }
               }
             },
-          },
-        })
+            'step-' + index
+          )
+          .to(
+            previousCopy,
+            {
+              opacity: 0,
+              yPercent: -18,
+              rotationX: 12,
+              skewY: -3,
+              z: -120,
+              duration: 0.72,
+            },
+            'step-' + index
+          )
+          .fromTo(
+            image,
+            {
+              opacity: 0,
+              scale: 1.16,
+              yPercent: 12,
+              filter: 'blur(54px)',
+            },
+            {
+              opacity: 1,
+              scale: 1,
+              yPercent: 0,
+              filter: 'blur(0px)',
+              duration: 1.25,
+              onUpdate: function() {
+                if (this.progress() >= 0.95) {
+                  setVideoReadyIndex(prev => (prev === index ? prev : index))
+                } else {
+                  setVideoReadyIndex(prev => (prev === index ? -1 : prev))
+                }
+              }
+            },
+            'step-' + index + '+=0.04'
+          )
+          .fromTo(
+            currentCopy,
+            {
+              opacity: 0,
+              yPercent: 24,
+              rotationX: -14,
+              skewY: 3,
+              z: -80,
+            },
+            {
+              opacity: 1,
+              yPercent: 0,
+              rotationX: 0,
+              skewY: 0,
+              z: 0,
+              duration: 0.95,
+            },
+            'step-' + index + '+=0.16'
+          )
+      })
 
-        timeline.to(images[0], {
-          scale: 1,
-          yPercent: 0,
-          filter: 'blur(0px)',
-          duration: 1.25,
-        })
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh()
+      })
+    }, sectionRef)
 
-        timeline.to(
-          copies[0],
-          {
-            opacity: 1,
-            yPercent: 0,
-            rotationX: 0,
-            skewY: 0,
-            z: 0,
-            duration: 0.95,
-          },
-          0.16
-        )
-
-        // Delay only the first transition so the opening frame holds longer on scroll.
-        timeline.addLabel('step-1', 1.15)
-
-        images.forEach((image, index) => {
-          if (index === 0) return
-
-          const previousImage = images[index - 1]
-          const previousCopy = copies[index - 1]
-          const currentCopy = copies[index]
-
-          timeline
-            .to(
-              previousImage,
-              {
-                opacity: 0.14,
-                scale: 1.24,
-                yPercent: -8,
-                filter: 'blur(48px)',
-                duration: 1,
-              },
-              'step-' + index
-            )
-            .to(
-              previousCopy,
-              {
-                opacity: 0,
-                yPercent: -18,
-                rotationX: 12,
-                skewY: -3,
-                z: -120,
-                duration: 0.72,
-              },
-              'step-' + index
-            )
-            .fromTo(
-              image,
-              {
-                opacity: 0,
-                scale: 1.16,
-                yPercent: 12,
-                filter: 'blur(54px)',
-              },
-              {
-                opacity: 1,
-                scale: 1,
-                yPercent: 0,
-                filter: 'blur(0px)',
-                duration: 1.25,
-              },
-              'step-' + index + '+=0.04'
-            )
-            .fromTo(
-              currentCopy,
-              {
-                opacity: 0,
-                yPercent: 24,
-                rotationX: -14,
-                skewY: 3,
-                z: -80,
-              },
-              {
-                opacity: 1,
-                yPercent: 0,
-                rotationX: 0,
-                skewY: 0,
-                z: 0,
-                duration: 0.95,
-              },
-              'step-' + index + '+=0.16'
-            )
-        })
-
-        requestAnimationFrame(() => {
-          ScrollTrigger.refresh()
-        })
-      }, sectionRef)
-    })()
-
-    return () => ctx?.revert()
+    return () => ctx.revert()
   }, [])
 
   return (
@@ -247,8 +290,8 @@ export default function MotionShowcase() {
           <div className={styles.baseGradient} aria-hidden="true" />
           <div className={styles.atmosphereFog} aria-hidden="true" />
           <div className={styles.editorialMeta} aria-hidden="true">
-            <span>Image studies</span>
-            <span>Editorial pacing</span>
+            <span>Moda Agency</span>
+            <span>Creative Direction</span>
           </div>
 
           {slides.map((slide, index) => (
@@ -267,28 +310,36 @@ export default function MotionShowcase() {
               <div className={styles.smokeVeil} aria-hidden="true" />
 
               <div className={`${styles.imageWrap} ${styles.primaryWrap}`}>
-                <Image
-                  src={slide.primaryImage}
-                  alt={slide.title}
-                  fill
-                  sizes="100vw"
-                  priority={index === 0}
-                />
+                {slide.primaryImage.endsWith('.mp4') ? (
+                  <VideoPlayer src={slide.primaryImage} isActive={index === videoReadyIndex} />
+                ) : (
+                  <Image
+                    src={slide.primaryImage}
+                    alt={slide.title}
+                    fill
+                    sizes="100vw"
+                    priority={index === 0}
+                  />
+                )}
               </div>
 
               <div className={`${styles.imageWrap} ${styles.secondaryWrap}`}>
-                <Image
-                  src={slide.secondaryImage}
-                  alt=""
-                  fill
-                  sizes="70vw"
-                />
+                {slide.secondaryImage.endsWith('.mp4') ? (
+                  <VideoPlayer src={slide.secondaryImage} isActive={index === videoReadyIndex} />
+                ) : (
+                  <Image
+                    src={slide.secondaryImage}
+                    alt=""
+                    fill
+                    sizes="70vw"
+                  />
+                )}
               </div>
             </div>
           ))}
 
           <div className={styles.foregroundCopy}>
-            <p className={styles.kicker}>Before contact</p>
+            <p className={styles.kicker}>Abordagem</p>
 
             <div className={styles.copyViewport}>
               {slides.map((slide, index) => (
@@ -314,7 +365,7 @@ export default function MotionShowcase() {
             </div>
 
             <div className={styles.bottomNote}>
-              <span>Visual narratives built for brand, motion and interface systems.</span>
+              <span>Estratégia e direção criativa para marcas que querem liderar o mercado com impacto.</span>
             </div>
           </div>
         </div>

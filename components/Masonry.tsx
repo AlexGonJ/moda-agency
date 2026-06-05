@@ -1,6 +1,7 @@
 'use client'
 import React, { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Masonry.css';
 
 // 1. Interface completa com todas as propriedades opcionais (corrige erro da Vercel)
@@ -102,81 +103,76 @@ const Masonry: React.FC<MasonryProps> = ({
   useLayoutEffect(() => {
     if (!imagesReady || !isMounted || grid.length === 0) return;
 
-    let ctx: gsap.Context | undefined;
+    gsap.registerPlugin(ScrollTrigger);
 
-    (async () => {
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-      gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      grid.forEach((item: GridItem) => {
+        const selector = `[data-key="${item.id}"]`;
+        const centerX = item.x + item.w / 2;
+        const centerY = item.y + item.h / 2;
+        const spreadX = (centerX - width / 2) * 0.22;
+        const spreadY = (centerY - totalHeight / 2) * 0.18;
 
-      ctx = gsap.context(() => {
-        grid.forEach((item: GridItem) => {
-          const selector = `[data-key="${item.id}"]`;
-          const centerX = item.x + item.w / 2;
-          const centerY = item.y + item.h / 2;
-          const spreadX = (centerX - width / 2) * 0.22;
-          const spreadY = (centerY - totalHeight / 2) * 0.18;
+        if (!hasMountedAnimation.current && !introAnimationPlayed.current) {
+          gsap.set(selector, {
+            opacity: 0,
+            x: item.x + spreadX,
+            y: item.y + spreadY + 80,
+            scale: 0.86,
+            width: item.w,
+            height: item.h,
+            filter: blurToFocus ? 'blur(18px)' : 'none',
+          });
+        } else {
+          gsap.to(selector, {
+            x: item.x,
+            y: item.y,
+            width: item.w,
+            height: item.h,
+            duration,
+            ease,
+            overwrite: 'auto'
+          });
+        }
+      });
 
-          if (!hasMountedAnimation.current && !introAnimationPlayed.current) {
-            gsap.set(selector, {
-              opacity: 0,
-              x: item.x + spreadX,
-              y: item.y + spreadY + 80,
-              scale: 0.86,
-              width: item.w,
-              height: item.h,
-              filter: blurToFocus ? 'blur(18px)' : 'none',
-            });
-          } else {
-            gsap.to(selector, {
-              x: item.x,
-              y: item.y,
-              width: item.w,
-              height: item.h,
-              duration,
-              ease,
-              overwrite: 'auto'
-            });
-          }
+      if (!introAnimationPlayed.current && containerRef.current) {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top 85%',
+            once: true,
+          },
         });
 
-        if (!introAnimationPlayed.current && containerRef.current) {
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: 'top 85%',
-              once: true,
+        grid.forEach((item: GridItem, index: number) => {
+          const selector = `[data-key="${item.id}"]`;
+
+          tl.to(
+            selector,
+            {
+              opacity: 1,
+              x: item.x,
+              y: item.y,
+              scale: 1,
+              width: item.w,
+              height: item.h,
+              filter: 'blur(0px)',
+              duration: 1,
+              ease: 'power3.out',
             },
-          });
+            index * stagger
+          );
+        });
 
-          grid.forEach((item: GridItem, index: number) => {
-            const selector = `[data-key="${item.id}"]`;
+        introAnimationPlayed.current = true;
+      }
 
-            tl.to(
-              selector,
-              {
-                opacity: 1,
-                x: item.x,
-                y: item.y,
-                scale: 1,
-                width: item.w,
-                height: item.h,
-                filter: 'blur(0px)',
-                duration: 1,
-                ease: 'power3.out',
-              },
-              index * stagger
-            );
-          });
-
-          introAnimationPlayed.current = true;
-        }
-
-        hasMountedAnimation.current = true;
-      }, containerRef);
-    })();
+      hasMountedAnimation.current = true;
+    }, containerRef);
 
     return () => {
-      ctx?.revert();
+      ctx.revert();
     };
   }, [grid, imagesReady, isMounted, stagger, duration, ease, blurToFocus, totalHeight, width]);
 

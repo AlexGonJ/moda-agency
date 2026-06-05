@@ -29,9 +29,15 @@ html, body {
   cursor: none !important;
 }
 :root {
-  --color-gold:    #c9a84c;
-  --color-ink:     #0d0d0d;
-  --color-surface: #ffffff;
-  --color-muted:   rgba(0, 0, 0, 0.35);
-  --color-border:  rgba(0, 0, 0, 0.1);
+  --color-gold:    #C79A58;
+  --color-ink:     #221B16;
+  --color-surface: #F7F1E8;
+  --color-muted:   rgba(34, 27, 22, 0.45);
+  --color-border:  rgba(34, 27, 22, 0.12);
+  --font-display:  'Syne', 'Helvetica Neue', Arial, sans-serif;
+  --font-body:     'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
 }

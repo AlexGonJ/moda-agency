@@ -6,19 +6,24 @@ import styles from '../styles/selected-work.module.scss'
 
 const projects = [
   {
-    title: 'Mobile App Experience',
-    meta: '2023 — UI/UX',
-    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80',
+    title: 'Animale SS26',
+    meta: 'Branding & Campanha — Direção Criativa',
+    image: 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=80',
   },
   {
-    title: 'Brand Identity System',
-    meta: '2022 — Branding',
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80',
+    title: 'Reserva Essentials',
+    meta: 'Conteúdo Digital — Estratégia de Marca',
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80',
   },
   {
-    title: 'Minimal Web Platform',
-    meta: '2024 — Web Design',
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80',
+    title: 'Farm Rio Global',
+    meta: 'Expansão Internacional — Rebranding',
+    image: 'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=800&q=80',
+  },
+  {
+    title: 'Osklen Archive',
+    meta: 'Campanha Editorial — Fotografia & Motion',
+    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80',
   },
 ]
 
@@ -95,24 +100,26 @@ useEffect(() => {
     gsap.set(cursor,  { opacity: 0, xPercent: -50, yPercent: -50 })
     gsap.set(imgB,    { yPercent: 0, opacity: 0 })
 
+    const previewXTo = gsap.quickTo(preview, 'x', { duration: 0.5, ease: 'power3.out' })
+    const previewYTo = gsap.quickTo(preview, 'y', { duration: 0.5, ease: 'power3.out' })
+    const cursorXTo = gsap.quickTo(cursor, 'x', { duration: 0.1, ease: 'none' })
+    const cursorYTo = gsap.quickTo(cursor, 'y', { duration: 0.1, ease: 'none' })
+
     let mouseX = 0, mouseY = 0
-    let px = 0, py = 0, rafId: number
 
     const onMove = (e: MouseEvent) => {
       lastY.current = mouseY
       mouseX = e.clientX
       mouseY = e.clientY
+
+      if (currentIndex.current !== -1) {
+        previewXTo(e.clientX)
+        previewYTo(e.clientY)
+        cursorXTo(e.clientX)
+        cursorYTo(e.clientY)
+      }
     }
     window.addEventListener('mousemove', onMove)
-
-    const tick = () => {
-      px += (mouseX - px) * 0.09
-      py += (mouseY - py) * 0.09
-      gsap.set(preview, { x: px, y: py })
-      gsap.set(cursor,  { x: mouseX, y: mouseY })
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
 
     const items = sectionRef.current?.querySelectorAll('[data-project-item]') ?? []
     const offs: (() => void)[] = []
@@ -125,6 +132,17 @@ useEffect(() => {
         if (isFirst) {
           imgA.src = src
           gsap.set(imgA, { yPercent: 0, opacity: 1 })
+
+          // Instant set to current mouse position to prevent gliding from old values
+          gsap.set(preview, { x: mouseX, y: mouseY })
+          gsap.set(cursor,  { x: mouseX, y: mouseY })
+
+          // Reset quickTo targets to current mouse position
+          previewXTo(mouseX)
+          previewYTo(mouseY)
+          cursorXTo(mouseX)
+          cursorYTo(mouseY)
+
           gsap.to(preview, { opacity: 1, scale: 1, duration: 0.45, ease: 'power3.out' })
           gsap.to(cursor,  { opacity: 1, duration: 0.3, ease: 'power3.out' })
         } else {
@@ -164,7 +182,6 @@ useEffect(() => {
 
     return () => {
       window.removeEventListener('mousemove', onMove)
-      cancelAnimationFrame(rafId)
       offs.forEach(fn => fn())
     }
   }, [isMobile])
@@ -178,7 +195,7 @@ const handleGlow = (e: React.MouseEvent<HTMLAnchorElement>): void => {
 
   return (
     <section id="projetos" ref={sectionRef} className={styles.selectedWork}>
-      <p className={styles.sectionLabel}>Selected Work</p>
+      <p className={styles.sectionLabel}>Cases</p>
 
       <ul className={styles.list}>
         {projects.map((project, i) => (
@@ -210,8 +227,8 @@ const handleGlow = (e: React.MouseEvent<HTMLAnchorElement>): void => {
   className={styles.moreWorkBtn}
   onMouseMove={handleGlow}
 ><div className={styles.borderGlow}></div>
-  <span>More work</span>
-</a>
+  <span>Ver todos os cases</span>
+ </a>
 </div>
 
       {!isMobile && (
@@ -225,7 +242,7 @@ const handleGlow = (e: React.MouseEvent<HTMLAnchorElement>): void => {
           </div>
 
           <div ref={cursorRef} className={styles.viewCursor} aria-hidden="true">
-            VIEW
+            VER
           </div>
         </>
       )}

@@ -57,49 +57,51 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
     const wordElements = el.querySelectorAll<HTMLElement>('.word')
 
-    gsap.fromTo(
-      el,
-      { rotate: baseRotation, opacity: 0 },
-      {
-        rotate: 0,
-        opacity: 1,
-        duration: 1,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: el,
-          scroller,
-          start: 'top 90%',
-          toggleActions: 'play none none reverse',
-        },
-      }
-    )
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        el,
+        { rotate: baseRotation, opacity: 0 },
+        {
+          rotate: 0,
+          opacity: 1,
+          duration: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            scroller,
+            start: 'top 90%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      )
 
-    gsap.fromTo(
-      wordElements,
-      {
-        opacity: baseOpacity,
-        filter: enableBlur ? `blur(${blurStrength}px)` : 'none',
-        y: 10,
-      },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        y: 0,
-        stagger: 0.03,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: el,
-          scroller,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-          once: true,
+      gsap.fromTo(
+        wordElements,
+        {
+          opacity: baseOpacity,
+          filter: enableBlur ? `blur(${blurStrength}px)` : 'none',
+          y: 10,
         },
-      }
-    )
+        {
+          opacity: 1,
+          filter: 'blur(0px)',
+          y: 0,
+          stagger: 0.03,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            scroller,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+            once: true,
+          },
+        }
+      )
+    }, el)
 
     return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill())
+      ctx.revert()
     }
   }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, blurStrength])
 

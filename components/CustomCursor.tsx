@@ -13,13 +13,12 @@ export default function CustomCursor() {
 
     gsap.set(el, { xPercent: -50, yPercent: -50 })
 
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.25, ease: 'power3.out' })
+    const yTo = gsap.quickTo(el, 'y', { duration: 0.25, ease: 'power3.out' })
+
     const move = (e: MouseEvent) => {
-      gsap.to(el, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.25,
-        ease: 'power3.out',
-      })
+      xTo(e.clientX)
+      yTo(e.clientY)
     }
 
     const onMouseOver = (e: MouseEvent) => {

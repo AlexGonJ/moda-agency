@@ -1,0 +1,61 @@
+@use './variables' as vars;
+
+.clients {
+  padding: 4rem 0;
+  background-color: vars.$bg;
+  color: vars.$text-primary;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(34, 27, 22, 0.08);
+  border-bottom: 1px solid rgba(34, 27, 22, 0.08);
+}
+
+.carouselContainer {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  // Fading edges for smooth entry/exit
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+
+.track {
+  display: flex;
+  gap: clamp(4rem, 8vw, 6rem);
+  padding: 0 clamp(2rem, 4vw, 3rem);
+  align-items: center;
+  animation: scroll 35s linear infinite;
+  white-space: nowrap;
+}
+
+.clientItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clientName {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: vars.$text-primary;
+  opacity: 0.25;
+  transition: opacity 0.4s ease;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - (clamp(4rem, 8vw, 6rem) / 2))); 
+  }
+}

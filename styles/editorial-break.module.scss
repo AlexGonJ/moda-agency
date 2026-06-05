@@ -2,8 +2,8 @@
   padding: clamp(4.5rem, 9vw, 8rem) 0;
   overflow: clip;
   background:
-    linear-gradient(180deg, #ebe0d0 0%, #f5eee4 56%, #faf7f2 100%);
-  color: #1e1a16;
+    linear-gradient(180deg, #efe5d8 0%, #f7f1e8 56%, #fdfbf7 100%);
+  color: #221B16;
 }
 
 .label,
@@ -15,7 +15,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: rgba(30, 26, 22, 0.38);
+  color: rgba(34, 27, 22, 0.38);
   margin-bottom: 1.6rem;
 }
 
@@ -31,10 +31,10 @@
   font-weight: 500;
 
   span {
-    color: rgba(30, 26, 22, 0.12);
+    color: rgba(34, 27, 22, 0.12);
 
     &:nth-child(2) {
-      color: #1e1a16;
+      color: #221B16;
     }
   }
 }
@@ -49,10 +49,10 @@
     font-size: clamp(1.8rem, 3.6vw, 3.3rem);
     line-height: 0.98;
     letter-spacing: -0.04em;
-    color: rgba(30, 26, 22, 0.92);
+    color: rgba(34, 27, 22, 0.92);
 
     &:last-child {
-      color: rgba(30, 26, 22, 0.42);
+      color: rgba(34, 27, 22, 0.42);
       padding-left: clamp(2rem, 8vw, 8rem);
     }
   }
@@ -64,7 +64,7 @@
   font-size: 0.92rem;
   line-height: 1.75;
   letter-spacing: 0.02em;
-  color: rgba(30, 26, 22, 0.54);
+  color: rgba(34, 27, 22, 0.54);
 }
 
 @media (max-width: 768px) {

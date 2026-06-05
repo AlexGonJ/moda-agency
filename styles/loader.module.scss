@@ -4,8 +4,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: #000;
-  color: #fff;
+  background: #F7F1E8;
+  color: #221B16;
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -26,10 +26,10 @@
   .barContainer {
     width: 100%;
     height: 2px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(34, 27, 22, 0.1);
     .bar {
       height: 100%;
-      background: #fff;
+      background: #221B16;
       transition: width 0.1s ease-out;
     }
   }

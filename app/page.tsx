@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import SelectedWork from '@/components/SelectedWork'
 import About from '@/components/About'
+import Clients from '@/components/Clients'
 import MotionShowcase from '@/components/MotionShowcase'
 import EditorialBreak from '@/components/EditorialBreak'
 import Contact from '@/components/Contact'
@@ -32,10 +33,11 @@ export default function Home() {
       {isLoading && <Loader onComplete={() => setIsLoading(false)} />}
 
       <div className="smooth-wrapper" style={{ opacity: isLoading ? 0 : 1 }}>
-        <main style={{ backgroundColor: '#fff', position: 'relative', zIndex: 1 }}>
+        <main style={{ backgroundColor: 'var(--color-surface)', position: 'relative', zIndex: 1 }}>
           <Navbar />
           <Hero start={!isLoading} />
           <About />
+          <Clients />
           <SelectedWork />
           <MotionShowcase />
           <EditorialBreak />
