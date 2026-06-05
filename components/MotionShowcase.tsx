@@ -96,11 +96,16 @@ export default function MotionShowcase() {
       const copies = copyRefs.current.filter(Boolean)
       if (!sectionRef.current || images.length === 0 || copies.length === 0) return
 
+      const isMobile = window.innerWidth <= 768;
+      const blurStart = isMobile ? 12 : 34;
+      const blurFirst = isMobile ? 16 : 54;
+      const blurPrev = isMobile ? 16 : 48;
+
       gsap.set(images, {
         opacity: 0,
         scale: 1.14,
         yPercent: 12,
-        filter: 'blur(34px)',
+        filter: `blur(${blurStart}px)`,
       })
 
       gsap.set(copies, {
@@ -115,7 +120,7 @@ export default function MotionShowcase() {
         opacity: 1,
         scale: 1.16,
         yPercent: 12,
-        filter: 'blur(54px)',
+        filter: `blur(${blurFirst}px)`,
       })
 
       gsap.set(copies[0], {
@@ -131,7 +136,7 @@ export default function MotionShowcase() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: '+=370%',
+          end: isMobile ? '+=260%' : '+=370%',
           pin: true,
           scrub: 1.15,
           anticipatePin: 1,
@@ -203,7 +208,7 @@ export default function MotionShowcase() {
               opacity: 0.14,
               scale: 1.24,
               yPercent: -8,
-              filter: 'blur(48px)',
+              filter: `blur(${blurPrev}px)`,
               duration: 1,
               onUpdate: function() {
                 if (this.progress() > 0.05) {
@@ -231,7 +236,7 @@ export default function MotionShowcase() {
               opacity: 0,
               scale: 1.16,
               yPercent: 12,
-              filter: 'blur(54px)',
+              filter: `blur(${blurFirst}px)`,
             },
             {
               opacity: 1,
