@@ -37,6 +37,34 @@ export default function SelectedWork() {
   const currentIndex = useRef<number>(-1)
   const lastY        = useRef<number>(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+  const isVisibleRef = useRef(false)
+
+  useEffect(() => {
+    isVisibleRef.current = isVisible
+  }, [isVisible])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting)
+      },
+      { rootMargin: '800px 0px' }
+    )
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
+
+  // Limpa as imagens do desktop e reseta o index quando sai da tela para economizar memória
+  useEffect(() => {
+    if (!isVisible && !isMobile) {
+      if (imgARef.current) imgARef.current.src = ''
+      if (imgBRef.current) imgBRef.current.src = ''
+      currentIndex.current = -1
+    }
+  }, [isVisible, isMobile])
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 1024)
@@ -108,6 +136,8 @@ useEffect(() => {
     let mouseX = 0, mouseY = 0
 
     const onMove = (e: MouseEvent) => {
+      if (!isVisibleRef.current) return
+
       lastY.current = mouseY
       mouseX = e.clientX
       mouseY = e.clientY
@@ -167,6 +197,8 @@ useEffect(() => {
     })
 
     const onHoverCheck = (e: MouseEvent) => {
+      if (!isVisibleRef.current) return
+
       const el = e.target as Element
       const overItem = !!el.closest('[data-project-item]')
 
@@ -207,7 +239,7 @@ const handleGlow = (e: React.MouseEvent<HTMLAnchorElement>): void => {
           >
             {isMobile && (
               <div className={styles.mobileImage}>
-                <img src={project.image} alt={project.title} />
+                {isVisible && <img src={project.image} alt={project.title} />}
               </div>
             )}
             <div className={styles.itemContent}>

@@ -6,21 +6,22 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from '../styles/motion-showcase.module.scss'
 
-const VideoPlayer = ({ src, isActive }: { src: string, isActive: boolean }) => {
+const VideoPlayer = ({ src, isActive, isNear }: { src: string, isActive: boolean, isNear: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && videoRef.current) {
       // Play the video when the slide becomes active (blur fades out)
-      videoRef.current?.play().catch(() => {})
-    } else {
+      videoRef.current.play().catch(() => {})
+    } else if (videoRef.current) {
       // Pause and reset when the slide is no longer active
-      videoRef.current?.pause()
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0
-      }
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
     }
   }, [isActive])
+
+  // Desmonta o vídeo completamente se não estiver próximo da viewport para economizar memória e GPU
+  if (!isNear) return null
 
   return (
     <video
@@ -28,6 +29,7 @@ const VideoPlayer = ({ src, isActive }: { src: string, isActive: boolean }) => {
       src={src}
       muted
       playsInline
+      preload="metadata"
       onEnded={(e) => e.currentTarget.pause()}
       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
     />
@@ -162,7 +164,8 @@ export default function MotionShowcase() {
         filter: 'blur(0px)',
         duration: 1.25,
         onUpdate: function() {
-          if (this.progress() >= 0.95) {
+          // Play earlier before the blur finishes
+          if (this.progress() >= 0.70) {
             setVideoReadyIndex(prev => (prev === 0 ? prev : 0))
           } else {
             setVideoReadyIndex(prev => (prev === 0 ? -1 : prev))
@@ -237,7 +240,7 @@ export default function MotionShowcase() {
               filter: 'blur(0px)',
               duration: 1.25,
               onUpdate: function() {
-                if (this.progress() >= 0.95) {
+                if (this.progress() >= 0.70) {
                   setVideoReadyIndex(prev => (prev === index ? prev : index))
                 } else {
                   setVideoReadyIndex(prev => (prev === index ? -1 : prev))
@@ -294,49 +297,59 @@ export default function MotionShowcase() {
             <span>Creative Direction</span>
           </div>
 
-          {slides.map((slide, index) => (
-            <div
-              key={slide.id}
-              ref={element => {
-                imageRefs.current[index] = element
-              }}
-              className={styles.imageLayer}
-              style={{
-                ['--layer-tint' as string]: slide.tint,
-                ['--smoke-mask' as string]: slide.smoke,
-              }}
-            >
-              <div className={styles.imageBleed} aria-hidden="true" />
-              <div className={styles.smokeVeil} aria-hidden="true" />
+          {slides.map((slide, index) => {
+            // isNear garante que renderizamos apenas o slide atual, o anterior e o próximo.
+            // Para index 2, ele será renderizado apenas quando activeIndex for >= 1.
+            const isNear = Math.abs(activeIndex - index) <= 1;
 
-              <div className={`${styles.imageWrap} ${styles.primaryWrap}`}>
-                {slide.primaryImage.endsWith('.mp4') ? (
-                  <VideoPlayer src={slide.primaryImage} isActive={index === videoReadyIndex} />
-                ) : (
-                  <Image
-                    src={slide.primaryImage}
-                    alt={slide.title}
-                    fill
-                    sizes="100vw"
-                    priority={index === 0}
-                  />
-                )}
-              </div>
+            return (
+              <div
+                key={slide.id}
+                ref={element => {
+                  imageRefs.current[index] = element
+                }}
+                className={styles.imageLayer}
+                style={{
+                  ['--layer-tint' as string]: slide.tint,
+                  ['--smoke-mask' as string]: slide.smoke,
+                }}
+              >
+                <div className={styles.imageBleed} aria-hidden="true" />
+                <div className={styles.smokeVeil} aria-hidden="true" />
 
-              <div className={`${styles.imageWrap} ${styles.secondaryWrap}`}>
-                {slide.secondaryImage.endsWith('.mp4') ? (
-                  <VideoPlayer src={slide.secondaryImage} isActive={index === videoReadyIndex} />
-                ) : (
-                  <Image
-                    src={slide.secondaryImage}
-                    alt=""
-                    fill
-                    sizes="70vw"
-                  />
-                )}
+                <div className={`${styles.imageWrap} ${styles.primaryWrap}`}>
+                  {slide.primaryImage.endsWith('.mp4') ? (
+                    <VideoPlayer src={slide.primaryImage} isActive={index === videoReadyIndex} isNear={isNear} />
+                  ) : (
+                    isNear && (
+                      <Image
+                        src={slide.primaryImage}
+                        alt={slide.title}
+                        fill
+                        sizes="100vw"
+                        priority={index === 0}
+                      />
+                    )
+                  )}
+                </div>
+
+                <div className={`${styles.imageWrap} ${styles.secondaryWrap}`}>
+                  {slide.secondaryImage.endsWith('.mp4') ? (
+                    <VideoPlayer src={slide.secondaryImage} isActive={index === videoReadyIndex} isNear={isNear} />
+                  ) : (
+                    isNear && (
+                      <Image
+                        src={slide.secondaryImage}
+                        alt=""
+                        fill
+                        sizes="70vw"
+                      />
+                    )
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <div className={styles.foregroundCopy}>
             <p className={styles.kicker}>Abordagem</p>
